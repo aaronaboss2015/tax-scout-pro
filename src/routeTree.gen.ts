@@ -10,9 +10,13 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as TransactionsRouteImport } from './routes/transactions'
+import { Route as SubscriptionsRouteImport } from './routes/subscriptions'
 import { Route as SignupRouteImport } from './routes/signup'
+import { Route as SettingsRouteImport } from './routes/settings'
+import { Route as QuarterlyRouteImport } from './routes/quarterly'
 import { Route as OnboardingRouteImport } from './routes/onboarding'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as ExportRouteImport } from './routes/export'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as CategoriesRouteImport } from './routes/categories'
 import { Route as IndexRouteImport } from './routes/index'
@@ -22,9 +26,24 @@ const TransactionsRoute = TransactionsRouteImport.update({
   path: '/transactions',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SubscriptionsRoute = SubscriptionsRouteImport.update({
+  id: '/subscriptions',
+  path: '/subscriptions',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SignupRoute = SignupRouteImport.update({
   id: '/signup',
   path: '/signup',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SettingsRoute = SettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const QuarterlyRoute = QuarterlyRouteImport.update({
+  id: '/quarterly',
+  path: '/quarterly',
   getParentRoute: () => rootRouteImport,
 } as any)
 const OnboardingRoute = OnboardingRouteImport.update({
@@ -35,6 +54,11 @@ const OnboardingRoute = OnboardingRouteImport.update({
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ExportRoute = ExportRouteImport.update({
+  id: '/export',
+  path: '/export',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DashboardRoute = DashboardRouteImport.update({
@@ -57,18 +81,26 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/categories': typeof CategoriesRoute
   '/dashboard': typeof DashboardRoute
+  '/export': typeof ExportRoute
   '/login': typeof LoginRoute
   '/onboarding': typeof OnboardingRoute
+  '/quarterly': typeof QuarterlyRoute
+  '/settings': typeof SettingsRoute
   '/signup': typeof SignupRoute
+  '/subscriptions': typeof SubscriptionsRoute
   '/transactions': typeof TransactionsRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/categories': typeof CategoriesRoute
   '/dashboard': typeof DashboardRoute
+  '/export': typeof ExportRoute
   '/login': typeof LoginRoute
   '/onboarding': typeof OnboardingRoute
+  '/quarterly': typeof QuarterlyRoute
+  '/settings': typeof SettingsRoute
   '/signup': typeof SignupRoute
+  '/subscriptions': typeof SubscriptionsRoute
   '/transactions': typeof TransactionsRoute
 }
 export interface FileRoutesById {
@@ -76,9 +108,13 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/categories': typeof CategoriesRoute
   '/dashboard': typeof DashboardRoute
+  '/export': typeof ExportRoute
   '/login': typeof LoginRoute
   '/onboarding': typeof OnboardingRoute
+  '/quarterly': typeof QuarterlyRoute
+  '/settings': typeof SettingsRoute
   '/signup': typeof SignupRoute
+  '/subscriptions': typeof SubscriptionsRoute
   '/transactions': typeof TransactionsRoute
 }
 export interface FileRouteTypes {
@@ -87,27 +123,39 @@ export interface FileRouteTypes {
     | '/'
     | '/categories'
     | '/dashboard'
+    | '/export'
     | '/login'
     | '/onboarding'
+    | '/quarterly'
+    | '/settings'
     | '/signup'
+    | '/subscriptions'
     | '/transactions'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/categories'
     | '/dashboard'
+    | '/export'
     | '/login'
     | '/onboarding'
+    | '/quarterly'
+    | '/settings'
     | '/signup'
+    | '/subscriptions'
     | '/transactions'
   id:
     | '__root__'
     | '/'
     | '/categories'
     | '/dashboard'
+    | '/export'
     | '/login'
     | '/onboarding'
+    | '/quarterly'
+    | '/settings'
     | '/signup'
+    | '/subscriptions'
     | '/transactions'
   fileRoutesById: FileRoutesById
 }
@@ -115,9 +163,13 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   CategoriesRoute: typeof CategoriesRoute
   DashboardRoute: typeof DashboardRoute
+  ExportRoute: typeof ExportRoute
   LoginRoute: typeof LoginRoute
   OnboardingRoute: typeof OnboardingRoute
+  QuarterlyRoute: typeof QuarterlyRoute
+  SettingsRoute: typeof SettingsRoute
   SignupRoute: typeof SignupRoute
+  SubscriptionsRoute: typeof SubscriptionsRoute
   TransactionsRoute: typeof TransactionsRoute
 }
 
@@ -130,11 +182,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TransactionsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/subscriptions': {
+      id: '/subscriptions'
+      path: '/subscriptions'
+      fullPath: '/subscriptions'
+      preLoaderRoute: typeof SubscriptionsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/signup': {
       id: '/signup'
       path: '/signup'
       fullPath: '/signup'
       preLoaderRoute: typeof SignupRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/settings': {
+      id: '/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof SettingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/quarterly': {
+      id: '/quarterly'
+      path: '/quarterly'
+      fullPath: '/quarterly'
+      preLoaderRoute: typeof QuarterlyRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/onboarding': {
@@ -149,6 +222,13 @@ declare module '@tanstack/react-router' {
       path: '/login'
       fullPath: '/login'
       preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/export': {
+      id: '/export'
+      path: '/export'
+      fullPath: '/export'
+      preLoaderRoute: typeof ExportRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/dashboard': {
@@ -179,9 +259,13 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   CategoriesRoute: CategoriesRoute,
   DashboardRoute: DashboardRoute,
+  ExportRoute: ExportRoute,
   LoginRoute: LoginRoute,
   OnboardingRoute: OnboardingRoute,
+  QuarterlyRoute: QuarterlyRoute,
+  SettingsRoute: SettingsRoute,
   SignupRoute: SignupRoute,
+  SubscriptionsRoute: SubscriptionsRoute,
   TransactionsRoute: TransactionsRoute,
 }
 export const routeTree = rootRouteImport
