@@ -1,0 +1,95 @@
+import { Link, useRouterState } from "@tanstack/react-router";
+import {
+  LayoutDashboard, Receipt, Tags, Calculator, FileDown,
+  Repeat, Settings, Sparkles, Bell, Search, ChevronDown, LogOut,
+} from "lucide-react";
+import { Input } from "@/components/ui/input";
+import {
+  DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { USER } from "@/lib/mockData";
+
+const NAV = [
+  { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
+  { to: "/transactions", label: "Transactions", icon: Receipt },
+  { to: "/categories", label: "Categories", icon: Tags },
+  { to: "/quarterly", label: "Quarterly", icon: Calculator },
+  { to: "/export", label: "Export", icon: FileDown },
+  { to: "/subscriptions", label: "Subscriptions", icon: Repeat },
+  { to: "/settings", label: "Settings", icon: Settings },
+] as const;
+
+export function AppShell({ children, title }: { children: React.ReactNode; title?: string }) {
+  const path = useRouterState({ select: (s) => s.location.pathname });
+
+  return (
+    <div className="flex min-h-screen bg-muted/30">
+      {/* Sidebar */}
+      <aside className="hidden w-60 flex-shrink-0 flex-col border-r bg-sidebar md:flex">
+        <Link to="/dashboard" className="flex h-16 items-center gap-2 border-b px-5">
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground"><Sparkles className="h-4 w-4" /></div>
+          <span className="font-bold">TaxScout</span>
+        </Link>
+        <nav className="flex-1 space-y-1 p-3">
+          {NAV.map(({ to, label, icon: Icon }) => {
+            const active = path === to;
+            return (
+              <Link key={to} to={to} className={`flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition ${active ? "bg-primary text-primary-foreground shadow-sm" : "text-sidebar-foreground hover:bg-sidebar-accent"}`}>
+                <Icon className="h-4 w-4" /> {label}
+              </Link>
+            );
+          })}
+        </nav>
+        <div className="border-t p-3">
+          <DropdownMenu>
+            <DropdownMenuTrigger className="flex w-full items-center gap-3 rounded-lg p-2 text-left transition hover:bg-sidebar-accent">
+              <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary text-sm font-semibold text-primary-foreground">{USER.initials}</div>
+              <div className="min-w-0 flex-1">
+                <div className="truncate text-sm font-semibold">{USER.name}</div>
+                <div className="truncate text-xs text-muted-foreground">{USER.email}</div>
+              </div>
+              <ChevronDown className="h-4 w-4 text-muted-foreground" />
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem asChild><Link to="/settings">Settings</Link></DropdownMenuItem>
+              <DropdownMenuItem asChild><Link to="/"><LogOut className="mr-2 h-4 w-4" /> Sign out</Link></DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+      </aside>
+
+      {/* Main */}
+      <div className="flex min-w-0 flex-1 flex-col">
+        <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-background px-6">
+          <h1 className="text-lg font-semibold">{title}</h1>
+          <div className="ml-auto flex items-center gap-3">
+            <div className="relative hidden md:block">
+              <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <Input placeholder="Search transactions…" className="h-9 w-72 pl-9" />
+            </div>
+            <button className="flex h-9 items-center gap-1.5 rounded-md border px-3 text-sm font-medium hover:bg-muted">
+              Year: 2026 <ChevronDown className="h-3.5 w-3.5" />
+            </button>
+            <button className="relative flex h-9 w-9 items-center justify-center rounded-md hover:bg-muted">
+              <Bell className="h-4 w-4" />
+              <span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-primary" />
+            </button>
+          </div>
+        </header>
+        <main className="flex-1 p-6 pb-24 md:pb-6">{children}</main>
+
+        {/* Mobile bottom nav */}
+        <nav className="fixed bottom-0 left-0 right-0 z-40 grid grid-cols-5 border-t bg-background md:hidden">
+          {NAV.slice(0, 5).map(({ to, label, icon: Icon }) => {
+            const active = path === to;
+            return (
+              <Link key={to} to={to} className={`flex flex-col items-center gap-0.5 py-2.5 text-[10px] font-medium ${active ? "text-primary" : "text-muted-foreground"}`}>
+                <Icon className="h-5 w-5" /> {label}
+              </Link>
+            );
+          })}
+        </nav>
+      </div>
+    </div>
+  );
+}
