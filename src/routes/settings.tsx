@@ -10,12 +10,14 @@ import { Separator } from "@/components/ui/separator";
 import { CreditCard, Trash2 } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { supabase } from "@/lib/supabase";
+import { useProfile, buildCheckoutUrl } from "@/lib/data";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 export const Route = createFileRoute("/settings")({ component: Settings });
 
 function Settings() {
   const { user } = useAuth();
+  const { profile, loading: profileLoading } = useProfile();
   const [name, setName] = useState((user?.user_metadata?.name as string | undefined) ?? "");
   const [profession, setProfession] = useState((user?.user_metadata?.profession as string | undefined) ?? "");
   const [city, setCity] = useState((user?.user_metadata?.city as string | undefined) ?? "");
@@ -78,13 +80,43 @@ function Settings() {
 
         <Card className="p-6">
           <h3 className="font-semibold">Billing</h3>
-          <div className="mt-4 flex items-center justify-between rounded-lg border p-4">
-            <div>
-              <div className="font-semibold">No active subscription</div>
-              <div className="text-xs text-muted-foreground">Choose a plan to unlock automatic categorization.</div>
+          {profileLoading ? (
+            <div className="mt-4 text-sm text-muted-foreground">Loading…</div>
+          ) : profile?.subscription_status === "active" || profile?.subscription_status === "trialing" ? (
+            <div className="mt-4 flex items-center justify-between rounded-lg border bg-primary-soft p-4">
+              <div>
+                <div className="font-semibold capitalize">{profile.subscription_plan ?? "Active"} plan</div>
+                <div className="text-xs text-muted-foreground">
+                  {profile.current_period_end
+                    ? `Renews ${new Date(profile.current_period_end).toLocaleDateString()}`
+                    : "Active subscription"}
+                </div>
+              </div>
+              <CreditCard className="h-4 w-4 text-primary" />
             </div>
-            <CreditCard className="h-4 w-4 text-muted-foreground" />
-          </div>
+          ) : (
+            <>
+              <div className="mt-4 flex items-center justify-between rounded-lg border p-4">
+                <div>
+                  <div className="font-semibold">
+                    {profile?.subscription_status ? `Subscription ${profile.subscription_status}` : "No active subscription"}
+                  </div>
+                  <div className="text-xs text-muted-foreground">Choose a plan to unlock automatic categorization.</div>
+                </div>
+                <CreditCard className="h-4 w-4 text-muted-foreground" />
+              </div>
+              {user && (
+                <div className="mt-3 grid grid-cols-2 gap-2">
+                  <a href={buildCheckoutUrl("monthly", user.id, user.email)}>
+                    <Button variant="outline" className="w-full">Monthly — $19/mo</Button>
+                  </a>
+                  <a href={buildCheckoutUrl("annual", user.id, user.email)}>
+                    <Button className="w-full bg-primary text-primary-foreground hover:bg-primary/90">Annual — $99/yr</Button>
+                  </a>
+                </div>
+              )}
+            </>
+          )}
         </Card>
 
         <Card className="p-6">

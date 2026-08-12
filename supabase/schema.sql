@@ -7,8 +7,16 @@ create table if not exists public.profiles (
   profession text,
   city text,
   annual_income numeric,
+  stripe_customer_id text,
+  subscription_status text,
+  subscription_plan text,
+  current_period_end timestamptz,
   created_at timestamptz not null default now()
 );
+
+create unique index if not exists profiles_stripe_customer_id_idx
+  on public.profiles (stripe_customer_id)
+  where stripe_customer_id is not null;
 
 create table if not exists public.transactions (
   id uuid primary key default gen_random_uuid(),
@@ -31,19 +39,26 @@ create index if not exists transactions_user_id_date_idx
 alter table public.profiles enable row level security;
 alter table public.transactions enable row level security;
 
+drop policy if exists "profiles: select own" on public.profiles;
 create policy "profiles: select own" on public.profiles
   for select using (auth.uid() = id);
+drop policy if exists "profiles: insert own" on public.profiles;
 create policy "profiles: insert own" on public.profiles
   for insert with check (auth.uid() = id);
+drop policy if exists "profiles: update own" on public.profiles;
 create policy "profiles: update own" on public.profiles
   for update using (auth.uid() = id);
 
+drop policy if exists "transactions: select own" on public.transactions;
 create policy "transactions: select own" on public.transactions
   for select using (auth.uid() = user_id);
+drop policy if exists "transactions: insert own" on public.transactions;
 create policy "transactions: insert own" on public.transactions
   for insert with check (auth.uid() = user_id);
+drop policy if exists "transactions: update own" on public.transactions;
 create policy "transactions: update own" on public.transactions
   for update using (auth.uid() = user_id);
+drop policy if exists "transactions: delete own" on public.transactions;
 create policy "transactions: delete own" on public.transactions
   for delete using (auth.uid() = user_id);
 

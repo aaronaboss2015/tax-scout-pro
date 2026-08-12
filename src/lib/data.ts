@@ -134,6 +134,55 @@ export function computeKPI(transactions: DbTransaction[]) {
   };
 }
 
+export interface DbProfile {
+  id: string;
+  name: string | null;
+  profession: string | null;
+  city: string | null;
+  stripe_customer_id: string | null;
+  subscription_status: string | null;
+  subscription_plan: string | null;
+  current_period_end: string | null;
+}
+
+export function useProfile() {
+  const [profile, setProfile] = useState<DbProfile | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  const refresh = useCallback(async () => {
+    setLoading(true);
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) {
+      setProfile(null);
+      setLoading(false);
+      return;
+    }
+    const { data } = await supabase.from("profiles").select("*").eq("id", user.id).single();
+    setProfile((data as DbProfile) ?? null);
+    setLoading(false);
+  }, []);
+
+  useEffect(() => {
+    refresh();
+  }, [refresh]);
+
+  return { profile, loading, refresh };
+}
+
+export const STRIPE_LINKS = {
+  monthly: "https://buy.stripe.com/bJeeVca58cxlb2Ya4oa3u00",
+  annual: "https://buy.stripe.com/00wfZg6SW2WL1so0tOa3u01",
+};
+
+export function buildCheckoutUrl(plan: "monthly" | "annual", userId: string, email?: string | null) {
+  const url = new URL(STRIPE_LINKS[plan]);
+  url.searchParams.set("client_reference_id", userId);
+  if (email) url.searchParams.set("prefilled_email", email);
+  return url.toString();
+}
+
 export function reviewQueue(transactions: DbTransaction[]) {
   return transactions.filter((t) => t.status === "review").slice(0, 5);
 }

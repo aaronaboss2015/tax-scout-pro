@@ -18,6 +18,8 @@ import {
   Star,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/lib/auth";
+import { buildCheckoutUrl } from "@/lib/data";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -302,16 +304,18 @@ function Calculator() {
   );
 }
 
-const STRIPE_LINKS = {
-  monthly: "https://buy.stripe.com/bJeeVca58cxlb2Ya4oa3u00",
-  annual: "https://buy.stripe.com/00wfZg6SW2WL1so0tOa3u01",
-};
-
 function Pricing() {
+  const { user } = useAuth();
+
+  function checkoutHref(plan: "monthly" | "annual") {
+    if (!user) return "/signup";
+    return buildCheckoutUrl(plan, user.id, user.email);
+  }
+
   const tiers = [
     { name: "Free trial", price: "$0", per: "for 14 days", desc: "Full access. No card required.", cta: "Start trial", features: ["Unlimited transactions", "AI categorization", "Schedule C preview"], href: "/signup" as const },
-    { name: "Monthly", price: "$19", per: "/ month", desc: "Cancel anytime.", cta: "Choose monthly", features: ["Everything in trial", "Quarterly tax estimator", "Schedule C export", "Email support"], href: STRIPE_LINKS.monthly },
-    { name: "Annual", price: "$99", per: "/ year", desc: "Save $129 vs monthly.", cta: "Choose annual", features: ["Everything in monthly", "Audit support", "CPA handoff", "Priority support"], featured: true, href: STRIPE_LINKS.annual },
+    { name: "Monthly", price: "$19", per: "/ month", desc: "Cancel anytime.", cta: user ? "Choose monthly" : "Sign up to subscribe", features: ["Everything in trial", "Quarterly tax estimator", "Schedule C export", "Email support"], href: checkoutHref("monthly") },
+    { name: "Annual", price: "$99", per: "/ year", desc: "Save $129 vs monthly.", cta: user ? "Choose annual" : "Sign up to subscribe", features: ["Everything in monthly", "Audit support", "CPA handoff", "Priority support"], featured: true, href: checkoutHref("annual") },
   ];
   return (
     <section id="pricing" className="mx-auto max-w-7xl px-6 py-24">
