@@ -21,6 +21,10 @@ import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as CategoriesRouteImport } from './routes/categories'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ApiStripeWebhookRouteImport } from './routes/api/stripe-webhook'
+import { Route as ApiPlaidSyncRouteImport } from './routes/api/plaid/sync'
+import { Route as ApiPlaidInstitutionsRouteImport } from './routes/api/plaid/institutions'
+import { Route as ApiPlaidExchangeTokenRouteImport } from './routes/api/plaid/exchange-token'
+import { Route as ApiPlaidCreateLinkTokenRouteImport } from './routes/api/plaid/create-link-token'
 
 const TransactionsRoute = TransactionsRouteImport.update({
   id: '/transactions',
@@ -82,6 +86,26 @@ const ApiStripeWebhookRoute = ApiStripeWebhookRouteImport.update({
   path: '/api/stripe-webhook',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPlaidSyncRoute = ApiPlaidSyncRouteImport.update({
+  id: '/api/plaid/sync',
+  path: '/api/plaid/sync',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPlaidInstitutionsRoute = ApiPlaidInstitutionsRouteImport.update({
+  id: '/api/plaid/institutions',
+  path: '/api/plaid/institutions',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPlaidExchangeTokenRoute = ApiPlaidExchangeTokenRouteImport.update({
+  id: '/api/plaid/exchange-token',
+  path: '/api/plaid/exchange-token',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPlaidCreateLinkTokenRoute = ApiPlaidCreateLinkTokenRouteImport.update({
+  id: '/api/plaid/create-link-token',
+  path: '/api/plaid/create-link-token',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -96,6 +120,10 @@ export interface FileRoutesByFullPath {
   '/subscriptions': typeof SubscriptionsRoute
   '/transactions': typeof TransactionsRoute
   '/api/stripe-webhook': typeof ApiStripeWebhookRoute
+  '/api/plaid/create-link-token': typeof ApiPlaidCreateLinkTokenRoute
+  '/api/plaid/exchange-token': typeof ApiPlaidExchangeTokenRoute
+  '/api/plaid/institutions': typeof ApiPlaidInstitutionsRoute
+  '/api/plaid/sync': typeof ApiPlaidSyncRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -110,6 +138,10 @@ export interface FileRoutesByTo {
   '/subscriptions': typeof SubscriptionsRoute
   '/transactions': typeof TransactionsRoute
   '/api/stripe-webhook': typeof ApiStripeWebhookRoute
+  '/api/plaid/create-link-token': typeof ApiPlaidCreateLinkTokenRoute
+  '/api/plaid/exchange-token': typeof ApiPlaidExchangeTokenRoute
+  '/api/plaid/institutions': typeof ApiPlaidInstitutionsRoute
+  '/api/plaid/sync': typeof ApiPlaidSyncRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -125,6 +157,10 @@ export interface FileRoutesById {
   '/subscriptions': typeof SubscriptionsRoute
   '/transactions': typeof TransactionsRoute
   '/api/stripe-webhook': typeof ApiStripeWebhookRoute
+  '/api/plaid/create-link-token': typeof ApiPlaidCreateLinkTokenRoute
+  '/api/plaid/exchange-token': typeof ApiPlaidExchangeTokenRoute
+  '/api/plaid/institutions': typeof ApiPlaidInstitutionsRoute
+  '/api/plaid/sync': typeof ApiPlaidSyncRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -141,6 +177,10 @@ export interface FileRouteTypes {
     | '/subscriptions'
     | '/transactions'
     | '/api/stripe-webhook'
+    | '/api/plaid/create-link-token'
+    | '/api/plaid/exchange-token'
+    | '/api/plaid/institutions'
+    | '/api/plaid/sync'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -155,6 +195,10 @@ export interface FileRouteTypes {
     | '/subscriptions'
     | '/transactions'
     | '/api/stripe-webhook'
+    | '/api/plaid/create-link-token'
+    | '/api/plaid/exchange-token'
+    | '/api/plaid/institutions'
+    | '/api/plaid/sync'
   id:
     | '__root__'
     | '/'
@@ -169,6 +213,10 @@ export interface FileRouteTypes {
     | '/subscriptions'
     | '/transactions'
     | '/api/stripe-webhook'
+    | '/api/plaid/create-link-token'
+    | '/api/plaid/exchange-token'
+    | '/api/plaid/institutions'
+    | '/api/plaid/sync'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -184,6 +232,10 @@ export interface RootRouteChildren {
   SubscriptionsRoute: typeof SubscriptionsRoute
   TransactionsRoute: typeof TransactionsRoute
   ApiStripeWebhookRoute: typeof ApiStripeWebhookRoute
+  ApiPlaidCreateLinkTokenRoute: typeof ApiPlaidCreateLinkTokenRoute
+  ApiPlaidExchangeTokenRoute: typeof ApiPlaidExchangeTokenRoute
+  ApiPlaidInstitutionsRoute: typeof ApiPlaidInstitutionsRoute
+  ApiPlaidSyncRoute: typeof ApiPlaidSyncRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -272,6 +324,34 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiStripeWebhookRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/plaid/sync': {
+      id: '/api/plaid/sync'
+      path: '/api/plaid/sync'
+      fullPath: '/api/plaid/sync'
+      preLoaderRoute: typeof ApiPlaidSyncRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/plaid/institutions': {
+      id: '/api/plaid/institutions'
+      path: '/api/plaid/institutions'
+      fullPath: '/api/plaid/institutions'
+      preLoaderRoute: typeof ApiPlaidInstitutionsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/plaid/exchange-token': {
+      id: '/api/plaid/exchange-token'
+      path: '/api/plaid/exchange-token'
+      fullPath: '/api/plaid/exchange-token'
+      preLoaderRoute: typeof ApiPlaidExchangeTokenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/plaid/create-link-token': {
+      id: '/api/plaid/create-link-token'
+      path: '/api/plaid/create-link-token'
+      fullPath: '/api/plaid/create-link-token'
+      preLoaderRoute: typeof ApiPlaidCreateLinkTokenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -288,6 +368,10 @@ const rootRouteChildren: RootRouteChildren = {
   SubscriptionsRoute: SubscriptionsRoute,
   TransactionsRoute: TransactionsRoute,
   ApiStripeWebhookRoute: ApiStripeWebhookRoute,
+  ApiPlaidCreateLinkTokenRoute: ApiPlaidCreateLinkTokenRoute,
+  ApiPlaidExchangeTokenRoute: ApiPlaidExchangeTokenRoute,
+  ApiPlaidInstitutionsRoute: ApiPlaidInstitutionsRoute,
+  ApiPlaidSyncRoute: ApiPlaidSyncRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

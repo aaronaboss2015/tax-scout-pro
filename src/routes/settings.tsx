@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { AppShell } from "@/components/taxscout/AppShell";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -7,17 +7,52 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
-import { CreditCard, Trash2 } from "lucide-react";
+import { CreditCard, Trash2, Building2, RefreshCw } from "lucide-react";
 import { useAuth } from "@/lib/auth";
-import { supabase } from "@/lib/supabase";
+import { supabase, authedFetch } from "@/lib/supabase";
 import { useProfile, buildCheckoutUrl } from "@/lib/data";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { ConnectBankButton } from "@/components/taxscout/ConnectBankButton";
 
 export const Route = createFileRoute("/settings")({ component: Settings });
+
+interface Institution {
+  id: string;
+  institution_name: string | null;
+  created_at: string;
+}
 
 function Settings() {
   const { user } = useAuth();
   const { profile, loading: profileLoading } = useProfile();
+  const [institutions, setInstitutions] = useState<Institution[]>([]);
+  const [syncing, setSyncing] = useState(false);
+  const [syncMessage, setSyncMessage] = useState<string | null>(null);
+
+  const refreshInstitutions = useCallback(async () => {
+    const res = await authedFetch("/api/plaid/institutions");
+    if (res.ok) {
+      const data = (await res.json()) as { institutions: Institution[] };
+      setInstitutions(data.institutions);
+    }
+  }, []);
+
+  useEffect(() => {
+    refreshInstitutions();
+  }, [refreshInstitutions]);
+
+  async function handleSyncNow() {
+    setSyncing(true);
+    setSyncMessage(null);
+    const res = await authedFetch("/api/plaid/sync", { method: "POST" });
+    if (res.ok) {
+      const data = (await res.json()) as { imported: number };
+      setSyncMessage(`Imported ${data.imported} new transaction${data.imported === 1 ? "" : "s"}.`);
+    } else {
+      setSyncMessage("Sync failed.");
+    }
+    setSyncing(false);
+  }
   const [name, setName] = useState((user?.user_metadata?.name as string | undefined) ?? "");
   const [profession, setProfession] = useState((user?.user_metadata?.profession as string | undefined) ?? "");
   const [city, setCity] = useState((user?.user_metadata?.city as string | undefined) ?? "");
@@ -72,9 +107,29 @@ function Settings() {
 
         <Card className="p-6">
           <h3 className="font-semibold">Linked accounts</h3>
-          <p className="mt-1 text-xs text-muted-foreground">Bank sync isn't set up yet — add transactions manually for now.</p>
+          <p className="mt-1 text-xs text-muted-foreground">Connect a bank to automatically import transactions.</p>
+          {institutions.length > 0 && (
+            <div className="mt-4 space-y-2">
+              {institutions.map((inst) => (
+                <div key={inst.id} className="flex items-center justify-between rounded-lg border p-3">
+                  <div className="flex items-center gap-3">
+                    <Building2 className="h-4 w-4 text-primary" />
+                    <span className="text-sm font-medium">{inst.institution_name ?? "Connected bank"}</span>
+                  </div>
+                  <span className="text-xs text-muted-foreground">
+                    Connected {new Date(inst.created_at).toLocaleDateString()}
+                  </span>
+                </div>
+              ))}
+              <Button variant="outline" size="sm" onClick={handleSyncNow} disabled={syncing}>
+                <RefreshCw className={`mr-1.5 h-3.5 w-3.5 ${syncing ? "animate-spin" : ""}`} />
+                {syncing ? "Syncing…" : "Sync now"}
+              </Button>
+              {syncMessage && <p className="text-xs text-muted-foreground">{syncMessage}</p>}
+            </div>
+          )}
           <div className="mt-4">
-            <Button variant="outline" className="w-full" disabled>+ Connect a bank account (coming soon)</Button>
+            <ConnectBankButton onConnected={refreshInstitutions} />
           </div>
         </Card>
 

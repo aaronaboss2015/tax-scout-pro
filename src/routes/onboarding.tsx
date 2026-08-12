@@ -10,6 +10,7 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 import { supabase } from "@/lib/supabase";
+import { ConnectBankButton } from "@/components/taxscout/ConnectBankButton";
 
 export const Route = createFileRoute("/onboarding")({ component: Onboarding });
 
@@ -100,17 +101,21 @@ function Step2() {
 }
 
 function Step3() {
+  const [connected, setConnected] = useState(false);
   return (
     <>
       <h2 className="text-2xl font-bold">Connect your accounts</h2>
-      <p className="mt-1 text-sm text-muted-foreground">Bank sync isn't available yet — you'll be able to add expenses manually from your dashboard.</p>
-      <button disabled className="mt-6 flex w-full cursor-not-allowed items-center gap-4 rounded-xl border-2 border-dashed p-6 text-left opacity-60">
-        <Building2 className="h-8 w-8 text-muted-foreground" />
-        <div>
-          <div className="font-semibold">Connect bank or credit card</div>
-          <div className="text-xs text-muted-foreground">Coming soon</div>
-        </div>
-      </button>
+      <p className="mt-1 text-sm text-muted-foreground">Read-only access via Plaid. We never store your credentials. You can skip this and add expenses manually instead.</p>
+      <div className="mt-6">
+        {connected ? (
+          <div className="flex items-center gap-3 rounded-xl border-2 border-primary bg-primary-soft p-6">
+            <Building2 className="h-8 w-8 text-primary" />
+            <div className="font-semibold">Bank connected — importing your transactions.</div>
+          </div>
+        ) : (
+          <ConnectBankButton onConnected={() => setConnected(true)} />
+        )}
+      </div>
     </>
   );
 }
