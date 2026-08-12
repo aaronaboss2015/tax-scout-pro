@@ -5,13 +5,18 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { FileDown, FileText, Mail, Sparkles } from "lucide-react";
-import { CATEGORIES, categoryTotals, USER } from "@/lib/mockData";
+import { CATEGORIES, categoryTotals, useTransactions } from "@/lib/data";
+import { useAuth } from "@/lib/auth";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 export const Route = createFileRoute("/export")({ component: Export });
 
 function Export() {
-  const totals = categoryTotals();
+  const { user } = useAuth();
+  const { transactions } = useTransactions();
+  const name = (user?.user_metadata?.name as string | undefined) ?? user?.email?.split("@")[0] ?? "—";
+  const profession = (user?.user_metadata?.profession as string | undefined) ?? "—";
+  const totals = categoryTotals(transactions);
   const rows = CATEGORIES.map(c => ({ ...c, total: Math.round(totals[c.name]?.total || 0) })).filter(r => r.total > 0);
   const grand = rows.reduce((s, r) => s + r.total, 0);
 
@@ -65,8 +70,8 @@ function Export() {
               <div className="mt-1 text-lg font-bold">Profit or Loss From Business</div>
             </div>
             <div className="grid grid-cols-2 gap-4 border-y py-4 text-sm">
-              <div><div className="text-xs text-muted-foreground">Name of proprietor</div><div className="font-semibold">{USER.name}</div></div>
-              <div><div className="text-xs text-muted-foreground">Principal business</div><div className="font-semibold">{USER.profession}</div></div>
+              <div><div className="text-xs text-muted-foreground">Name of proprietor</div><div className="font-semibold">{name}</div></div>
+              <div><div className="text-xs text-muted-foreground">Principal business</div><div className="font-semibold">{profession}</div></div>
             </div>
             <div>
               <div className="mb-2 text-sm font-bold">Part II — Expenses</div>

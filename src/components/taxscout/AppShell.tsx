@@ -1,4 +1,5 @@
-import { Link, useRouterState } from "@tanstack/react-router";
+import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
+import { useEffect } from "react";
 import {
   LayoutDashboard, Receipt, Tags, Calculator, FileDown,
   Repeat, Settings, Sparkles, Bell, Search, ChevronDown, LogOut,
@@ -7,7 +8,8 @@ import { Input } from "@/components/ui/input";
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { USER } from "@/lib/mockData";
+import { useAuth } from "@/lib/auth";
+import { supabase } from "@/lib/supabase";
 
 const NAV = [
   { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -21,6 +23,36 @@ const NAV = [
 
 export function AppShell({ children, title }: { children: React.ReactNode; title?: string }) {
   const path = useRouterState({ select: (s) => s.location.pathname });
+  const nav = useNavigate();
+  const { user, loading } = useAuth();
+
+  useEffect(() => {
+    if (!loading && !user) {
+      nav({ to: "/login" });
+    }
+  }, [loading, user, nav]);
+
+  if (loading || !user) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-muted/30">
+        <div className="text-sm text-muted-foreground">Loading…</div>
+      </div>
+    );
+  }
+
+  const email = user.email ?? "";
+  const name = (user.user_metadata?.name as string | undefined) ?? email.split("@")[0] ?? "Account";
+  const initials = name
+    .split(" ")
+    .map((p) => p[0])
+    .join("")
+    .slice(0, 2)
+    .toUpperCase();
+
+  async function handleSignOut() {
+    await supabase.auth.signOut();
+    nav({ to: "/" });
+  }
 
   return (
     <div className="flex min-h-screen bg-muted/30">
@@ -43,16 +75,16 @@ export function AppShell({ children, title }: { children: React.ReactNode; title
         <div className="border-t p-3">
           <DropdownMenu>
             <DropdownMenuTrigger className="flex w-full items-center gap-3 rounded-lg p-2 text-left transition hover:bg-sidebar-accent">
-              <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary text-sm font-semibold text-primary-foreground">{USER.initials}</div>
+              <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary text-sm font-semibold text-primary-foreground">{initials}</div>
               <div className="min-w-0 flex-1">
-                <div className="truncate text-sm font-semibold">{USER.name}</div>
-                <div className="truncate text-xs text-muted-foreground">{USER.email}</div>
+                <div className="truncate text-sm font-semibold">{name}</div>
+                <div className="truncate text-xs text-muted-foreground">{email}</div>
               </div>
               <ChevronDown className="h-4 w-4 text-muted-foreground" />
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <DropdownMenuItem asChild><Link to="/settings">Settings</Link></DropdownMenuItem>
-              <DropdownMenuItem asChild><Link to="/"><LogOut className="mr-2 h-4 w-4" /> Sign out</Link></DropdownMenuItem>
+              <DropdownMenuItem onClick={handleSignOut}><LogOut className="mr-2 h-4 w-4" /> Sign out</DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>

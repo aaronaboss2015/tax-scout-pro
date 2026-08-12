@@ -3,12 +3,13 @@ import { AppShell } from "@/components/taxscout/AppShell";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ChevronRight } from "lucide-react";
-import { CATEGORIES, categoryTotals } from "@/lib/mockData";
+import { CATEGORIES, categoryTotals, useTransactions } from "@/lib/data";
 
 export const Route = createFileRoute("/categories")({ component: Categories });
 
 function Categories() {
-  const totals = categoryTotals();
+  const { transactions } = useTransactions();
+  const totals = categoryTotals(transactions);
   const rows = CATEGORIES.map(c => ({
     ...c,
     total: Math.round(totals[c.name]?.total || 0),

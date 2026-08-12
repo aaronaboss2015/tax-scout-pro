@@ -1,17 +1,29 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { AppShell } from "@/components/taxscout/AppShell";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Calendar, AlertCircle, PiggyBank } from "lucide-react";
+import { useTransactions, computeKPI } from "@/lib/data";
 
 export const Route = createFileRoute("/quarterly")({ component: Quarterly });
 
 function Quarterly() {
+  const { transactions, loading } = useTransactions();
+  const kpi = computeKPI(transactions);
   const [income, setIncome] = useState(87000);
-  const [deductions, setDeductions] = useState(7432);
+  const [deductions, setDeductions] = useState(0);
+  const [deductionsSeeded, setDeductionsSeeded] = useState(false);
+
+  useEffect(() => {
+    if (!loading && !deductionsSeeded) {
+      setDeductions(kpi.deductionsYTD);
+      setDeductionsSeeded(true);
+    }
+  }, [loading, deductionsSeeded, kpi.deductionsYTD]);
+
   const taxable = Math.max(0, income - deductions);
   const seTax = taxable * 0.9235 * 0.153;
   const fedTax = taxable * 0.22;

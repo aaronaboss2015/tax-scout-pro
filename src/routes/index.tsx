@@ -302,11 +302,16 @@ function Calculator() {
   );
 }
 
+const STRIPE_LINKS = {
+  monthly: "https://buy.stripe.com/bJeeVca58cxlb2Ya4oa3u00",
+  annual: "https://buy.stripe.com/00wfZg6SW2WL1so0tOa3u01",
+};
+
 function Pricing() {
   const tiers = [
-    { name: "Free trial", price: "$0", per: "for 14 days", desc: "Full access. No card required.", cta: "Start trial", features: ["Unlimited transactions", "AI categorization", "Schedule C preview"] },
-    { name: "Monthly", price: "$19", per: "/ month", desc: "Cancel anytime.", cta: "Choose monthly", features: ["Everything in trial", "Quarterly tax estimator", "Schedule C export", "Email support"] },
-    { name: "Annual", price: "$99", per: "/ year", desc: "Save $129 vs monthly.", cta: "Choose annual", features: ["Everything in monthly", "Audit support", "CPA handoff", "Priority support"], featured: true },
+    { name: "Free trial", price: "$0", per: "for 14 days", desc: "Full access. No card required.", cta: "Start trial", features: ["Unlimited transactions", "AI categorization", "Schedule C preview"], href: "/signup" as const },
+    { name: "Monthly", price: "$19", per: "/ month", desc: "Cancel anytime.", cta: "Choose monthly", features: ["Everything in trial", "Quarterly tax estimator", "Schedule C export", "Email support"], href: STRIPE_LINKS.monthly },
+    { name: "Annual", price: "$99", per: "/ year", desc: "Save $129 vs monthly.", cta: "Choose annual", features: ["Everything in monthly", "Audit support", "CPA handoff", "Priority support"], featured: true, href: STRIPE_LINKS.annual },
   ];
   return (
     <section id="pricing" className="mx-auto max-w-7xl px-6 py-24">
@@ -335,11 +340,19 @@ function Pricing() {
                 </li>
               ))}
             </ul>
-            <Link to="/signup" className="mt-7 block">
-              <Button className={`w-full ${t.featured ? "bg-primary text-primary-foreground hover:bg-primary/90" : ""}`} variant={t.featured ? "default" : "outline"}>
-                {t.cta}
-              </Button>
-            </Link>
+            {t.href === "/signup" ? (
+              <Link to="/signup" className="mt-7 block">
+                <Button className={`w-full ${t.featured ? "bg-primary text-primary-foreground hover:bg-primary/90" : ""}`} variant={t.featured ? "default" : "outline"}>
+                  {t.cta}
+                </Button>
+              </Link>
+            ) : (
+              <a href={t.href} className="mt-7 block">
+                <Button className={`w-full ${t.featured ? "bg-primary text-primary-foreground hover:bg-primary/90" : ""}`} variant={t.featured ? "default" : "outline"}>
+                  {t.cta}
+                </Button>
+              </a>
+            )}
           </Card>
         ))}
       </div>

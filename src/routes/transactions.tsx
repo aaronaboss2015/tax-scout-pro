@@ -4,10 +4,13 @@ import { AppShell } from "@/components/taxscout/AppShell";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
-import { Search, Filter, Download, Brain, Paperclip, Edit3 } from "lucide-react";
-import { TRANSACTIONS, type Transaction } from "@/lib/mockData";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Search, Filter, Plus } from "lucide-react";
+import { useTransactions, addTransaction, setTransactionStatus, CATEGORIES, type DbTransaction, type Status } from "@/lib/data";
 import { ConfidenceBadge } from "./dashboard";
 
 export const Route = createFileRoute("/transactions")({ component: Transactions });
@@ -15,19 +18,27 @@ export const Route = createFileRoute("/transactions")({ component: Transactions 
 const FILTERS = ["All", "Deductible", "Personal", "Needs Review"] as const;
 
 function Transactions() {
+  const { transactions, loading, refresh } = useTransactions();
   const [filter, setFilter] = useState<(typeof FILTERS)[number]>("All");
   const [q, setQ] = useState("");
-  const [active, setActive] = useState<Transaction | null>(null);
+  const [active, setActive] = useState<DbTransaction | null>(null);
+  const [addOpen, setAddOpen] = useState(false);
 
   const rows = useMemo(() => {
-    return TRANSACTIONS.filter(t => {
+    return transactions.filter(t => {
       if (filter === "Deductible" && t.status !== "deductible") return false;
       if (filter === "Personal" && t.status !== "personal") return false;
       if (filter === "Needs Review" && t.status !== "review") return false;
       if (q && !t.merchant.toLowerCase().includes(q.toLowerCase())) return false;
       return true;
-    }).slice(0, 100);
-  }, [filter, q]);
+    }).slice(0, 200);
+  }, [transactions, filter, q]);
+
+  async function handleStatusChange(id: string, status: Status) {
+    await setTransactionStatus(id, status);
+    setActive(null);
+    refresh();
+  }
 
   return (
     <AppShell title="Transactions">
@@ -35,11 +46,10 @@ function Transactions() {
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
             <h2 className="text-2xl font-bold">All transactions</h2>
-            <p className="text-sm text-muted-foreground">{TRANSACTIONS.length.toLocaleString()} reviewed across 3 accounts</p>
+            <p className="text-sm text-muted-foreground">{transactions.length.toLocaleString()} logged</p>
           </div>
           <div className="flex gap-2">
-            <Button variant="outline"><Filter className="mr-2 h-4 w-4" /> Filters</Button>
-            <Button className="bg-primary text-primary-foreground hover:bg-primary/90"><Download className="mr-2 h-4 w-4" /> Export CSV</Button>
+            <AddTransactionDialog open={addOpen} onOpenChange={setAddOpen} onAdded={refresh} />
           </div>
         </div>
 
@@ -56,7 +66,6 @@ function Transactions() {
                 </button>
               ))}
             </div>
-            <Button variant="outline" size="sm" className="ml-auto">Approve all &gt; 90% confidence</Button>
           </div>
         </Card>
 
@@ -75,13 +84,16 @@ function Transactions() {
                 </tr>
               </thead>
               <tbody>
+                {!loading && rows.length === 0 && (
+                  <tr><td colSpan={7} className="px-4 py-10 text-center text-muted-foreground">No transactions yet. Add your first one above.</td></tr>
+                )}
                 {rows.map(t => (
                   <tr key={t.id} onClick={() => setActive(t)} className="cursor-pointer border-b last:border-0 hover:bg-muted/40">
                     <td className="px-4 py-3 text-muted-foreground">{t.date}</td>
                     <td className="px-4 py-3 font-medium">{t.merchant}</td>
                     <td className="px-4 py-3 text-right tabular-nums font-semibold">${t.amount.toFixed(2)}</td>
                     <td className="px-4 py-3 text-muted-foreground">{t.category}</td>
-                    <td className="px-4 py-3 text-muted-foreground">{t.irsLine}</td>
+                    <td className="px-4 py-3 text-muted-foreground">{t.irs_line}</td>
                     <td className="px-4 py-3"><ConfidenceBadge value={t.confidence} /></td>
                     <td className="px-4 py-3"><StatusBadge status={t.status} /></td>
                   </tr>
@@ -90,8 +102,7 @@ function Transactions() {
             </table>
           </div>
           <div className="flex items-center justify-between border-t bg-muted/30 px-4 py-2.5 text-xs text-muted-foreground">
-            <span>Showing {rows.length} of {TRANSACTIONS.length}</span>
-            <div className="flex gap-1"><Button variant="ghost" size="sm">Previous</Button><Button variant="ghost" size="sm">Next</Button></div>
+            <span>Showing {rows.length} of {transactions.length}</span>
           </div>
         </Card>
       </div>
@@ -110,21 +121,17 @@ function Transactions() {
                   <div className="mt-1.5"><StatusBadge status={active.status} /></div>
                 </div>
                 <div>
-                  <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">AI category</div>
-                  <div className="mt-1.5 font-medium">{active.category} → {active.irsLine}</div>
+                  <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Category</div>
+                  <div className="mt-1.5 font-medium">{active.category} → {active.irs_line}</div>
                 </div>
-                <div className="rounded-lg border bg-primary-soft p-3">
-                  <div className="flex items-center gap-2 text-xs font-semibold text-primary"><Brain className="h-3.5 w-3.5" /> AI reasoning</div>
-                  <p className="mt-1.5 text-sm leading-relaxed">{active.reasoning}</p>
-                </div>
-                <div className="grid grid-cols-3 gap-2">
-                  <Button variant="outline" size="sm"><Edit3 className="mr-1.5 h-3.5 w-3.5" /> Edit</Button>
-                  <Button variant="outline" size="sm">Mark personal</Button>
-                  <Button variant="outline" size="sm"><Paperclip className="mr-1.5 h-3.5 w-3.5" /> Receipt</Button>
-                </div>
-                <div>
-                  <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Note</div>
-                  <Input placeholder="Add a note for your records…" className="mt-1.5" />
+                {active.reasoning && (
+                  <div className="rounded-lg border bg-primary-soft p-3">
+                    <p className="text-sm leading-relaxed">{active.reasoning}</p>
+                  </div>
+                )}
+                <div className="grid grid-cols-2 gap-2">
+                  <Button variant="outline" size="sm" onClick={() => handleStatusChange(active.id, "deductible")}>Mark deductible</Button>
+                  <Button variant="outline" size="sm" onClick={() => handleStatusChange(active.id, "personal")}>Mark personal</Button>
                 </div>
               </div>
             </>
@@ -135,7 +142,94 @@ function Transactions() {
   );
 }
 
-function StatusBadge({ status }: { status: Transaction["status"] }) {
+function AddTransactionDialog({ open, onOpenChange, onAdded }: { open: boolean; onOpenChange: (o: boolean) => void; onAdded: () => void }) {
+  const [merchant, setMerchant] = useState("");
+  const [amount, setAmount] = useState("");
+  const [date, setDate] = useState(() => new Date().toISOString().slice(0, 10));
+  const [categoryName, setCategoryName] = useState(CATEGORIES[0].name);
+  const [status, setStatus] = useState<Status>("deductible");
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  async function handleSave() {
+    const amt = parseFloat(amount);
+    if (!merchant.trim() || !amt || amt <= 0) {
+      setError("Enter a merchant and a valid amount.");
+      return;
+    }
+    const cat = CATEGORIES.find(c => c.name === categoryName)!;
+    setSaving(true);
+    setError(null);
+    try {
+      await addTransaction({ date, merchant: merchant.trim(), amount: amt, category: cat.name, irs_line: cat.line, status });
+      setMerchant("");
+      setAmount("");
+      onOpenChange(false);
+      onAdded();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Failed to save.");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogTrigger asChild>
+        <Button className="bg-primary text-primary-foreground hover:bg-primary/90"><Plus className="mr-2 h-4 w-4" /> Add transaction</Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Add a transaction</DialogTitle>
+        </DialogHeader>
+        <div className="space-y-4">
+          <div>
+            <Label htmlFor="merchant">Merchant</Label>
+            <Input id="merchant" value={merchant} onChange={(e) => setMerchant(e.target.value)} className="mt-1.5" placeholder="e.g. Adobe Creative Cloud" />
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <Label htmlFor="amount">Amount</Label>
+              <Input id="amount" type="number" step="0.01" value={amount} onChange={(e) => setAmount(e.target.value)} className="mt-1.5" placeholder="0.00" />
+            </div>
+            <div>
+              <Label htmlFor="date">Date</Label>
+              <Input id="date" type="date" value={date} onChange={(e) => setDate(e.target.value)} className="mt-1.5" />
+            </div>
+          </div>
+          <div>
+            <Label>Category</Label>
+            <Select value={categoryName} onValueChange={setCategoryName}>
+              <SelectTrigger className="mt-1.5"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                {CATEGORIES.map(c => <SelectItem key={c.name} value={c.name}>{c.name} ({c.line})</SelectItem>)}
+              </SelectContent>
+            </Select>
+          </div>
+          <div>
+            <Label>Status</Label>
+            <Select value={status} onValueChange={(v) => setStatus(v as Status)}>
+              <SelectTrigger className="mt-1.5"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="deductible">Deductible</SelectItem>
+                <SelectItem value="personal">Personal</SelectItem>
+                <SelectItem value="review">Needs review</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          {error && <p className="text-sm text-destructive">{error}</p>}
+        </div>
+        <DialogFooter>
+          <Button onClick={handleSave} disabled={saving} className="bg-primary text-primary-foreground hover:bg-primary/90">
+            {saving ? "Saving…" : "Save transaction"}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function StatusBadge({ status }: { status: DbTransaction["status"] }) {
   const map = {
     deductible: { cls: "bg-primary text-primary-foreground", label: "Deductible" },
     personal: { cls: "bg-muted text-muted-foreground", label: "Personal" },

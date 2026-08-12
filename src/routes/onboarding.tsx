@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
-import { Sparkles, Check, Building2, CreditCard, Wallet } from "lucide-react";
+import { Sparkles, Building2, Wallet } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -9,13 +9,24 @@ import { Progress } from "@/components/ui/progress";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
+import { supabase } from "@/lib/supabase";
 
 export const Route = createFileRoute("/onboarding")({ component: Onboarding });
 
 function Onboarding() {
   const nav = useNavigate();
   const [step, setStep] = useState(1);
-  const next = () => (step === 4 ? nav({ to: "/dashboard" }) : setStep(step + 1));
+  const [name, setName] = useState("");
+  const [profession, setProfession] = useState("designer");
+
+  const next = async () => {
+    if (step === 4) {
+      await supabase.auth.updateUser({ data: { name, profession } });
+      nav({ to: "/dashboard" });
+      return;
+    }
+    setStep(step + 1);
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary-soft via-background to-background p-6">
@@ -29,7 +40,7 @@ function Onboarding() {
         </div>
         <Progress value={(step / 4) * 100} className="mb-8 h-2" />
         <Card className="p-8">
-          {step === 1 && <Step1 />}
+          {step === 1 && <Step1 name={name} onNameChange={setName} profession={profession} onProfessionChange={setProfession} />}
           {step === 2 && <Step2 />}
           {step === 3 && <Step3 />}
           {step === 4 && <Step4 />}
@@ -45,16 +56,18 @@ function Onboarding() {
   );
 }
 
-function Step1() {
+function Step1({ name, onNameChange, profession, onProfessionChange }: {
+  name: string; onNameChange: (v: string) => void; profession: string; onProfessionChange: (v: string) => void;
+}) {
   return (
     <>
       <h2 className="text-2xl font-bold">Tell us about you</h2>
       <p className="mt-1 text-sm text-muted-foreground">We'll personalize your deduction categories.</p>
       <div className="mt-6 space-y-4">
-        <div><Label>Full name</Label><Input className="mt-1.5" defaultValue="Jordan Reyes" /></div>
+        <div><Label>Full name</Label><Input className="mt-1.5" value={name} onChange={e => onNameChange(e.target.value)} /></div>
         <div>
           <Label>What do you do?</Label>
-          <Select defaultValue="designer">
+          <Select value={profession} onValueChange={onProfessionChange}>
             <SelectTrigger className="mt-1.5"><SelectValue /></SelectTrigger>
             <SelectContent>
               {["designer","developer","consultant","coach","writer","photographer","real-estate","other"].map(v => (
@@ -87,29 +100,17 @@ function Step2() {
 }
 
 function Step3() {
-  const [linked, setLinked] = useState(false);
   return (
     <>
       <h2 className="text-2xl font-bold">Connect your accounts</h2>
-      <p className="mt-1 text-sm text-muted-foreground">Read-only access via Plaid. We never store your credentials.</p>
-      {!linked ? (
-        <button onClick={() => setLinked(true)} className="mt-6 flex w-full items-center gap-4 rounded-xl border-2 border-dashed border-primary/40 bg-primary-soft p-6 text-left transition hover:bg-accent">
-          <Building2 className="h-8 w-8 text-primary" />
-          <div>
-            <div className="font-semibold">Connect bank or credit card</div>
-            <div className="text-xs text-muted-foreground">Plaid securely links 12,000+ institutions</div>
-          </div>
-        </button>
-      ) : (
-        <div className="mt-6 space-y-2">
-          {["Chase Sapphire", "Amex Business", "Bank of America Checking"].map(n => (
-            <div key={n} className="flex items-center justify-between rounded-lg border bg-card p-3">
-              <div className="flex items-center gap-3"><CreditCard className="h-5 w-5 text-primary" /><span className="text-sm font-medium">{n}</span></div>
-              <span className="flex items-center gap-1 text-xs font-medium text-primary"><Check className="h-3.5 w-3.5" /> Connected</span>
-            </div>
-          ))}
+      <p className="mt-1 text-sm text-muted-foreground">Bank sync isn't available yet — you'll be able to add expenses manually from your dashboard.</p>
+      <button disabled className="mt-6 flex w-full cursor-not-allowed items-center gap-4 rounded-xl border-2 border-dashed p-6 text-left opacity-60">
+        <Building2 className="h-8 w-8 text-muted-foreground" />
+        <div>
+          <div className="font-semibold">Connect bank or credit card</div>
+          <div className="text-xs text-muted-foreground">Coming soon</div>
         </div>
-      )}
+      </button>
     </>
   );
 }
@@ -118,21 +119,21 @@ function Step4() {
   return (
     <>
       <h2 className="text-2xl font-bold">Track income too (optional)</h2>
-      <p className="mt-1 text-sm text-muted-foreground">Connect payment apps to estimate quarterly taxes accurately.</p>
+      <p className="mt-1 text-sm text-muted-foreground">Payment app sync isn't available yet.</p>
       <div className="mt-6 space-y-2">
         {[
           { n: "Stripe", d: "For client invoicing" },
           { n: "PayPal", d: "Personal & business" },
           { n: "Venmo", d: "Business profile" },
         ].map(x => (
-          <button key={x.n} className="flex w-full items-center gap-4 rounded-lg border p-4 text-left hover:border-primary/40">
-            <Wallet className="h-5 w-5 text-primary" />
+          <div key={x.n} className="flex w-full items-center gap-4 rounded-lg border p-4 opacity-60">
+            <Wallet className="h-5 w-5 text-muted-foreground" />
             <div className="flex-1">
               <div className="text-sm font-semibold">{x.n}</div>
               <div className="text-xs text-muted-foreground">{x.d}</div>
             </div>
-            <span className="text-xs font-medium text-primary">Connect</span>
-          </button>
+            <span className="text-xs font-medium text-muted-foreground">Coming soon</span>
+          </div>
         ))}
       </div>
     </>
