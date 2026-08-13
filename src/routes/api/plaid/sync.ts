@@ -1,7 +1,21 @@
 import { createFileRoute } from "@tanstack/react-router";
-import type { Transaction } from "plaid";
-import { getAuthedUser, plaidClient, serviceClient } from "@/lib/server";
+import { getAuthedUser, plaidFetch, serviceClient } from "@/lib/server";
 import { guessCategory, shouldSkipTransaction } from "@/lib/plaidCategorize";
+
+interface PlaidTransaction {
+  transaction_id: string;
+  date: string;
+  merchant_name?: string | null;
+  name: string;
+  amount: number;
+  personal_finance_category?: { primary?: string } | null;
+}
+
+interface SyncResponse {
+  added: PlaidTransaction[];
+  has_more: boolean;
+  next_cursor: string;
+}
 
 export const Route = createFileRoute("/api/plaid/sync")({
   server: {
@@ -11,7 +25,6 @@ export const Route = createFileRoute("/api/plaid/sync")({
         if (!user) return new Response("Unauthorized", { status: 401 });
 
         const supabase = serviceClient();
-        const plaid = plaidClient();
 
         const { data: items, error: itemsError } = await supabase
           .from("plaid_items")
@@ -25,28 +38,28 @@ export const Route = createFileRoute("/api/plaid/sync")({
         for (const item of items) {
           let cursor: string | undefined = item.cursor ?? undefined;
           let hasMore = true;
-          const added: Transaction[] = [];
+          const added: PlaidTransaction[] = [];
 
           while (hasMore) {
-            const response = await plaid.transactionsSync({
+            const response = await plaidFetch<SyncResponse>("/transactions/sync", {
               access_token: item.access_token,
               cursor,
             });
-            added.push(...response.data.added);
-            hasMore = response.data.has_more;
-            cursor = response.data.next_cursor;
+            added.push(...response.added);
+            hasMore = response.has_more;
+            cursor = response.next_cursor;
           }
 
           const rows = added
-            .filter((t) => !shouldSkipTransaction((t.personal_finance_category as { primary?: string } | undefined)?.primary))
-            .filter((t) => (t.amount as number) > 0)
+            .filter((t) => !shouldSkipTransaction(t.personal_finance_category?.primary))
+            .filter((t) => t.amount > 0)
             .map((t) => {
-              const guess = guessCategory((t.personal_finance_category as { primary?: string } | undefined)?.primary);
+              const guess = guessCategory(t.personal_finance_category?.primary);
               return {
                 user_id: user.id,
-                date: t.date as string,
-                merchant: (t.merchant_name as string | undefined) ?? (t.name as string),
-                amount: t.amount as number,
+                date: t.date,
+                merchant: t.merchant_name ?? t.name,
+                amount: t.amount,
                 category: guess.category,
                 irs_line: guess.irsLine,
                 status: guess.status,

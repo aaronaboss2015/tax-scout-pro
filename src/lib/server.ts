@@ -1,6 +1,5 @@
 import { env } from "cloudflare:workers";
 import { createClient } from "@supabase/supabase-js";
-import { Configuration, PlaidApi, PlaidEnvironments } from "plaid";
 
 export function serviceClient() {
   return createClient(env.VITE_SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY);
@@ -18,16 +17,39 @@ export async function getAuthedUser(request: Request) {
   return data.user;
 }
 
-export function plaidClient() {
-  const envName = (env.PLAID_ENV || "sandbox") as keyof typeof PlaidEnvironments;
-  const config = new Configuration({
-    basePath: PlaidEnvironments[envName],
-    baseOptions: {
-      headers: {
-        "PLAID-CLIENT-ID": env.PLAID_CLIENT_ID,
-        "PLAID-SECRET": env.PLAID_SECRET,
-      },
-    },
+const PLAID_BASE_URLS: Record<string, string> = {
+  sandbox: "https://sandbox.plaid.com",
+  development: "https://development.plaid.com",
+  production: "https://production.plaid.com",
+};
+
+export class PlaidError extends Error {
+  details: unknown;
+  constructor(details: unknown) {
+    super("Plaid API error");
+    this.details = details;
+  }
+}
+
+/**
+ * Calls the Plaid REST API directly via fetch, with client_id/secret in the
+ * request body. The official Plaid Node SDK is axios-based and doesn't
+ * reliably send custom headers in the Cloudflare Workers runtime, so we
+ * bypass it entirely -- body-based auth is an equally supported, documented
+ * Plaid authentication method.
+ */
+export async function plaidFetch<T>(path: string, body: Record<string, unknown>): Promise<T> {
+  const baseUrl = PLAID_BASE_URLS[env.PLAID_ENV || "sandbox"];
+  const response = await fetch(`${baseUrl}${path}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      client_id: env.PLAID_CLIENT_ID,
+      secret: env.PLAID_SECRET,
+      ...body,
+    }),
   });
-  return new PlaidApi(config);
+  const data = await response.json();
+  if (!response.ok) throw new PlaidError(data);
+  return data as T;
 }
