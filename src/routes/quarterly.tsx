@@ -5,17 +5,31 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Calendar, AlertCircle, PiggyBank } from "lucide-react";
-import { useTransactions, computeKPI } from "@/lib/data";
+import { useTransactions, computeKPI, useProfile } from "@/lib/data";
+import { STATE_TAX_RATES, STATE_CODES } from "@/lib/stateTax";
 
 export const Route = createFileRoute("/quarterly")({ component: Quarterly });
 
+function quarterDueDates(year: number) {
+  return [
+    { q: "Q1", due: new Date(year, 3, 15) },
+    { q: "Q2", due: new Date(year, 5, 15) },
+    { q: "Q3", due: new Date(year, 8, 15) },
+    { q: "Q4", due: new Date(year + 1, 0, 15) },
+  ];
+}
+
 function Quarterly() {
   const { transactions, loading } = useTransactions();
+  const { profile, loading: profileLoading } = useProfile();
   const kpi = computeKPI(transactions);
-  const [income, setIncome] = useState(87000);
+  const [income, setIncome] = useState(0);
+  const [incomeSeeded, setIncomeSeeded] = useState(false);
   const [deductions, setDeductions] = useState(0);
   const [deductionsSeeded, setDeductionsSeeded] = useState(false);
+  const [state, setState] = useState("NY");
 
   useEffect(() => {
     if (!loading && !deductionsSeeded) {
@@ -24,19 +38,27 @@ function Quarterly() {
     }
   }, [loading, deductionsSeeded, kpi.deductionsYTD]);
 
+  useEffect(() => {
+    if (!profileLoading && !incomeSeeded) {
+      setIncome(profile?.annual_income ? Number(profile.annual_income) : 60000);
+      setIncomeSeeded(true);
+    }
+  }, [profileLoading, incomeSeeded, profile]);
+
+  const stateRate = STATE_TAX_RATES[state]?.rate ?? 0;
   const taxable = Math.max(0, income - deductions);
   const seTax = taxable * 0.9235 * 0.153;
   const fedTax = taxable * 0.22;
-  const stateTax = taxable * 0.065;
+  const stateTax = taxable * stateRate;
   const total = seTax + fedTax + stateTax;
   const quarterly = total / 4;
 
-  const quarters = [
-    { q: "Q1", due: "Apr 15, 2026", paid: true },
-    { q: "Q2", due: "Jun 17, 2026", paid: true },
-    { q: "Q3", due: "Sep 16, 2026", paid: false, next: true },
-    { q: "Q4", due: "Jan 15, 2027", paid: false },
-  ];
+  const now = new Date();
+  const quarters = quarterDueDates(now.getFullYear()).map((q, i, arr) => {
+    const past = q.due < now;
+    const isNext = !past && arr.slice(0, i).every((prev) => prev.due < now);
+    return { ...q, past, next: isNext };
+  });
 
   return (
     <AppShell title="Quarterly Taxes">
@@ -49,16 +71,27 @@ function Quarterly() {
         <div className="grid gap-6 lg:grid-cols-3">
           <Card className="p-6 lg:col-span-2">
             <h3 className="font-semibold">Your numbers</h3>
-            <div className="mt-4 grid gap-4 sm:grid-cols-2">
+            <div className="mt-4 grid gap-4 sm:grid-cols-3">
               <div><Label>Projected annual income</Label><Input type="number" className="mt-1.5" value={income} onChange={e => setIncome(+e.target.value || 0)} /></div>
               <div><Label>Deductions found</Label><Input type="number" className="mt-1.5" value={deductions} onChange={e => setDeductions(+e.target.value || 0)} /></div>
+              <div>
+                <Label>State</Label>
+                <Select value={state} onValueChange={setState}>
+                  <SelectTrigger className="mt-1.5"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    {STATE_CODES.map(code => (
+                      <SelectItem key={code} value={code}>{STATE_TAX_RATES[code].name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
             <div className="mt-6 space-y-3 rounded-lg border bg-muted/30 p-4 text-sm">
               {[
                 ["Taxable income", taxable],
                 ["Self-employment tax (15.3%)", seTax],
                 ["Federal income tax (~22%)", fedTax],
-                ["State tax (NY, ~6.5%)", stateTax],
+                [`State tax (${STATE_TAX_RATES[state]?.name ?? state}, ${(stateRate * 100).toFixed(2)}%)`, stateTax],
               ].map(([l, v]) => (
                 <div key={l as string} className="flex justify-between"><span className="text-muted-foreground">{l}</span><span className="font-semibold tabular-nums">${Math.round(v as number).toLocaleString()}</span></div>
               ))}
@@ -69,7 +102,7 @@ function Quarterly() {
           <Card className="p-6">
             <div className="flex items-center gap-2 text-primary"><PiggyBank className="h-5 w-5" /><h3 className="font-semibold">Set aside</h3></div>
             <div className="mt-3 text-sm text-muted-foreground">For each $1 you earn, save:</div>
-            <div className="mt-1 text-4xl font-bold">{Math.round((total / income) * 100)}¢</div>
+            <div className="mt-1 text-4xl font-bold">{income > 0 ? Math.round((total / income) * 100) : 0}¢</div>
             <div className="mt-4 rounded-lg bg-primary-soft p-4">
               <div className="text-xs font-medium text-primary">Recommended quarterly payment</div>
               <div className="mt-1 text-2xl font-bold">${Math.round(quarterly).toLocaleString()}</div>
@@ -79,16 +112,17 @@ function Quarterly() {
         </div>
 
         <Card className="p-6">
-          <h3 className="font-semibold">2026 quarterly schedule</h3>
+          <h3 className="font-semibold">{now.getFullYear()} quarterly schedule</h3>
+          <p className="text-xs text-muted-foreground">We don't track which payments you've actually made yet — this just shows due dates relative to today.</p>
           <div className="mt-4 grid gap-3 md:grid-cols-4">
             {quarters.map(q => (
               <div key={q.q} className={`rounded-xl border p-4 ${q.next ? "border-primary bg-primary-soft" : ""}`}>
                 <div className="flex items-center justify-between">
                   <span className="text-sm font-bold">{q.q}</span>
-                  {q.paid ? <span className="text-xs font-medium text-primary">Paid ✓</span> : q.next ? <span className="flex items-center gap-1 text-xs font-medium text-primary"><AlertCircle className="h-3 w-3" /> Up next</span> : <span className="text-xs text-muted-foreground">Upcoming</span>}
+                  {q.next ? <span className="flex items-center gap-1 text-xs font-medium text-primary"><AlertCircle className="h-3 w-3" /> Up next</span> : q.past ? <span className="text-xs text-muted-foreground">Due date passed</span> : <span className="text-xs text-muted-foreground">Upcoming</span>}
                 </div>
-                <div className="mt-1.5 text-xs text-muted-foreground">Due {q.due}</div>
-                <div className="mt-3 text-xl font-bold">${Math.round(quarterly).toLocaleString()}</div>
+                <div className="mt-1.5 text-xs text-muted-foreground">Due {q.due.toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })}</div>
+                <div className="mt-3 text-xl font-bold tabular-nums">${Math.round(quarterly).toLocaleString()}</div>
               </div>
             ))}
           </div>

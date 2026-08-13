@@ -106,9 +106,9 @@ function Hero() {
                 Start 14-day free trial <ArrowRight className="ml-1 h-4 w-4" />
               </Button>
             </Link>
-            <Link to="/dashboard">
-              <Button size="lg" variant="outline">See live demo</Button>
-            </Link>
+            <a href="#how">
+              <Button size="lg" variant="outline">See how it works</Button>
+            </a>
           </div>
           <div className="mt-6 flex items-center gap-4 text-sm text-muted-foreground">
             <span className="flex items-center gap-1"><Check className="h-4 w-4 text-primary" /> No credit card</span>

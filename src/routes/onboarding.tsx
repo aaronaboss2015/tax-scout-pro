@@ -14,15 +14,32 @@ import { ConnectBankButton } from "@/components/taxscout/ConnectBankButton";
 
 export const Route = createFileRoute("/onboarding")({ component: Onboarding });
 
+const INCOME_RANGES = [
+  { label: "$0 – $25K", estimate: 12500 },
+  { label: "$25K – $50K", estimate: 37500 },
+  { label: "$50K – $100K", estimate: 75000 },
+  { label: "$100K+", estimate: 125000 },
+];
+
 function Onboarding() {
   const nav = useNavigate();
   const [step, setStep] = useState(1);
   const [name, setName] = useState("");
   const [profession, setProfession] = useState("designer");
+  const [incomePick, setIncomePick] = useState(2);
 
   const next = async () => {
     if (step === 4) {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       await supabase.auth.updateUser({ data: { name, profession } });
+      if (user) {
+        await supabase
+          .from("profiles")
+          .update({ annual_income: INCOME_RANGES[incomePick].estimate })
+          .eq("id", user.id);
+      }
       nav({ to: "/dashboard" });
       return;
     }
@@ -42,7 +59,7 @@ function Onboarding() {
         <Progress value={(step / 4) * 100} className="mb-8 h-2" />
         <Card className="p-8">
           {step === 1 && <Step1 name={name} onNameChange={setName} profession={profession} onProfessionChange={setProfession} />}
-          {step === 2 && <Step2 />}
+          {step === 2 && <Step2 pick={incomePick} onPickChange={setIncomePick} />}
           {step === 3 && <Step3 />}
           {step === 4 && <Step4 />}
           <div className="mt-8 flex justify-between">
@@ -82,17 +99,15 @@ function Step1({ name, onNameChange, profession, onProfessionChange }: {
   );
 }
 
-function Step2() {
-  const ranges = ["$0 – $25K", "$25K – $50K", "$50K – $100K", "$100K+"];
-  const [pick, setPick] = useState(2);
+function Step2({ pick, onPickChange }: { pick: number; onPickChange: (i: number) => void }) {
   return (
     <>
       <h2 className="text-2xl font-bold">Estimated annual income</h2>
       <p className="mt-1 text-sm text-muted-foreground">Used to calculate your tax bracket and quarterly estimates.</p>
       <div className="mt-6 grid grid-cols-2 gap-3">
-        {ranges.map((r, i) => (
-          <button key={r} onClick={() => setPick(i)} className={`rounded-xl border p-4 text-left transition ${pick === i ? "border-primary bg-primary-soft" : "hover:border-primary/40"}`}>
-            <div className="text-sm font-semibold">{r}</div>
+        {INCOME_RANGES.map((r, i) => (
+          <button key={r.label} onClick={() => onPickChange(i)} className={`rounded-xl border p-4 text-left transition ${pick === i ? "border-primary bg-primary-soft" : "hover:border-primary/40"}`}>
+            <div className="text-sm font-semibold">{r.label}</div>
           </button>
         ))}
       </div>
