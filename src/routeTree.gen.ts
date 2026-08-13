@@ -10,10 +10,12 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as TransactionsRouteImport } from './routes/transactions'
+import { Route as TermsRouteImport } from './routes/terms'
 import { Route as SubscriptionsRouteImport } from './routes/subscriptions'
 import { Route as SignupRouteImport } from './routes/signup'
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as QuarterlyRouteImport } from './routes/quarterly'
+import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as OnboardingRouteImport } from './routes/onboarding'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as ExportRouteImport } from './routes/export'
@@ -29,6 +31,11 @@ import { Route as ApiPlaidCreateLinkTokenRouteImport } from './routes/api/plaid/
 const TransactionsRoute = TransactionsRouteImport.update({
   id: '/transactions',
   path: '/transactions',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TermsRoute = TermsRouteImport.update({
+  id: '/terms',
+  path: '/terms',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SubscriptionsRoute = SubscriptionsRouteImport.update({
@@ -49,6 +56,11 @@ const SettingsRoute = SettingsRouteImport.update({
 const QuarterlyRoute = QuarterlyRouteImport.update({
   id: '/quarterly',
   path: '/quarterly',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PrivacyRoute = PrivacyRouteImport.update({
+  id: '/privacy',
+  path: '/privacy',
   getParentRoute: () => rootRouteImport,
 } as any)
 const OnboardingRoute = OnboardingRouteImport.update({
@@ -114,10 +126,12 @@ export interface FileRoutesByFullPath {
   '/export': typeof ExportRoute
   '/login': typeof LoginRoute
   '/onboarding': typeof OnboardingRoute
+  '/privacy': typeof PrivacyRoute
   '/quarterly': typeof QuarterlyRoute
   '/settings': typeof SettingsRoute
   '/signup': typeof SignupRoute
   '/subscriptions': typeof SubscriptionsRoute
+  '/terms': typeof TermsRoute
   '/transactions': typeof TransactionsRoute
   '/api/stripe-webhook': typeof ApiStripeWebhookRoute
   '/api/plaid/create-link-token': typeof ApiPlaidCreateLinkTokenRoute
@@ -132,10 +146,12 @@ export interface FileRoutesByTo {
   '/export': typeof ExportRoute
   '/login': typeof LoginRoute
   '/onboarding': typeof OnboardingRoute
+  '/privacy': typeof PrivacyRoute
   '/quarterly': typeof QuarterlyRoute
   '/settings': typeof SettingsRoute
   '/signup': typeof SignupRoute
   '/subscriptions': typeof SubscriptionsRoute
+  '/terms': typeof TermsRoute
   '/transactions': typeof TransactionsRoute
   '/api/stripe-webhook': typeof ApiStripeWebhookRoute
   '/api/plaid/create-link-token': typeof ApiPlaidCreateLinkTokenRoute
@@ -151,10 +167,12 @@ export interface FileRoutesById {
   '/export': typeof ExportRoute
   '/login': typeof LoginRoute
   '/onboarding': typeof OnboardingRoute
+  '/privacy': typeof PrivacyRoute
   '/quarterly': typeof QuarterlyRoute
   '/settings': typeof SettingsRoute
   '/signup': typeof SignupRoute
   '/subscriptions': typeof SubscriptionsRoute
+  '/terms': typeof TermsRoute
   '/transactions': typeof TransactionsRoute
   '/api/stripe-webhook': typeof ApiStripeWebhookRoute
   '/api/plaid/create-link-token': typeof ApiPlaidCreateLinkTokenRoute
@@ -171,10 +189,12 @@ export interface FileRouteTypes {
     | '/export'
     | '/login'
     | '/onboarding'
+    | '/privacy'
     | '/quarterly'
     | '/settings'
     | '/signup'
     | '/subscriptions'
+    | '/terms'
     | '/transactions'
     | '/api/stripe-webhook'
     | '/api/plaid/create-link-token'
@@ -189,10 +209,12 @@ export interface FileRouteTypes {
     | '/export'
     | '/login'
     | '/onboarding'
+    | '/privacy'
     | '/quarterly'
     | '/settings'
     | '/signup'
     | '/subscriptions'
+    | '/terms'
     | '/transactions'
     | '/api/stripe-webhook'
     | '/api/plaid/create-link-token'
@@ -207,10 +229,12 @@ export interface FileRouteTypes {
     | '/export'
     | '/login'
     | '/onboarding'
+    | '/privacy'
     | '/quarterly'
     | '/settings'
     | '/signup'
     | '/subscriptions'
+    | '/terms'
     | '/transactions'
     | '/api/stripe-webhook'
     | '/api/plaid/create-link-token'
@@ -226,10 +250,12 @@ export interface RootRouteChildren {
   ExportRoute: typeof ExportRoute
   LoginRoute: typeof LoginRoute
   OnboardingRoute: typeof OnboardingRoute
+  PrivacyRoute: typeof PrivacyRoute
   QuarterlyRoute: typeof QuarterlyRoute
   SettingsRoute: typeof SettingsRoute
   SignupRoute: typeof SignupRoute
   SubscriptionsRoute: typeof SubscriptionsRoute
+  TermsRoute: typeof TermsRoute
   TransactionsRoute: typeof TransactionsRoute
   ApiStripeWebhookRoute: typeof ApiStripeWebhookRoute
   ApiPlaidCreateLinkTokenRoute: typeof ApiPlaidCreateLinkTokenRoute
@@ -245,6 +271,13 @@ declare module '@tanstack/react-router' {
       path: '/transactions'
       fullPath: '/transactions'
       preLoaderRoute: typeof TransactionsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/terms': {
+      id: '/terms'
+      path: '/terms'
+      fullPath: '/terms'
+      preLoaderRoute: typeof TermsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/subscriptions': {
@@ -273,6 +306,13 @@ declare module '@tanstack/react-router' {
       path: '/quarterly'
       fullPath: '/quarterly'
       preLoaderRoute: typeof QuarterlyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/privacy': {
+      id: '/privacy'
+      path: '/privacy'
+      fullPath: '/privacy'
+      preLoaderRoute: typeof PrivacyRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/onboarding': {
@@ -362,10 +402,12 @@ const rootRouteChildren: RootRouteChildren = {
   ExportRoute: ExportRoute,
   LoginRoute: LoginRoute,
   OnboardingRoute: OnboardingRoute,
+  PrivacyRoute: PrivacyRoute,
   QuarterlyRoute: QuarterlyRoute,
   SettingsRoute: SettingsRoute,
   SignupRoute: SignupRoute,
   SubscriptionsRoute: SubscriptionsRoute,
+  TermsRoute: TermsRoute,
   TransactionsRoute: TransactionsRoute,
   ApiStripeWebhookRoute: ApiStripeWebhookRoute,
   ApiPlaidCreateLinkTokenRoute: ApiPlaidCreateLinkTokenRoute,

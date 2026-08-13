@@ -29,11 +29,11 @@ function Categories() {
           <div className="flex items-baseline justify-between">
             <div>
               <div className="text-sm text-muted-foreground">Total deductions YTD</div>
-              <div className="mt-1 text-4xl font-bold">${grand.toLocaleString()}</div>
+              <div className="mt-1 font-mono-nums text-4xl font-bold">${grand.toLocaleString()}</div>
             </div>
             <div className="text-right text-sm">
               <div className="text-muted-foreground">Estimated tax saved</div>
-              <div className="text-2xl font-semibold text-primary">${Math.round(grand * 0.25).toLocaleString()}</div>
+              <div className="font-mono-nums text-2xl font-semibold text-primary">${Math.round(grand * 0.25).toLocaleString()}</div>
             </div>
           </div>
         </Card>

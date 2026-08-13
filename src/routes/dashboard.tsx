@@ -69,7 +69,7 @@ function Dashboard() {
                 <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">{k.label}</span>
                 <k.icon className={`h-4 w-4 ${k.accent || "text-muted-foreground"}`} />
               </div>
-              <div className="mt-2 text-3xl font-bold">{k.value}</div>
+              <div className="mt-2 font-mono-nums text-3xl font-bold">{k.value}</div>
               {"delta" in k && k.delta && <div className="mt-1 text-xs text-muted-foreground">{k.delta}</div>}
             </Card>
           ))}
@@ -121,14 +121,14 @@ function Dashboard() {
                   </ResponsiveContainer>
                   <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
                     <div className="text-xs text-muted-foreground">Total</div>
-                    <div className="text-lg font-bold">${cats.reduce((s, c) => s + c.value, 0).toLocaleString()}</div>
+                    <div className="text-lg font-bold tabular-nums">${cats.reduce((s, c) => s + c.value, 0).toLocaleString()}</div>
                   </div>
                 </div>
                 <div className="mt-3 space-y-1.5">
                   {cats.slice(0, 5).map((c, i) => (
                     <div key={c.name} className="flex items-center justify-between text-xs">
                       <span className="flex items-center gap-2"><span className="h-2 w-2 rounded-full" style={{ background: COLORS[i] }} /> {c.name}</span>
-                      <span className="font-medium">${c.value.toLocaleString()}</span>
+                      <span className="font-medium tabular-nums">${c.value.toLocaleString()}</span>
                     </div>
                   ))}
                 </div>

@@ -15,7 +15,6 @@ import {
   Check,
   ChevronDown,
   ArrowRight,
-  Star,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/lib/auth";
@@ -44,7 +43,7 @@ function Landing() {
       <WhatWeFind />
       <Calculator />
       <Pricing />
-      <Testimonials />
+      <WhyTaxScout />
       <FAQ />
       <Footer />
     </div>
@@ -180,16 +179,15 @@ function HeroMockup() {
 
 function TrustBar() {
   const items = [
-    { i: <Wallet className="h-4 w-4" />, t: "Trusted by 10,000+ freelancers" },
     { i: <ShieldCheck className="h-4 w-4" />, t: "Bank-level 256-bit encryption" },
-    { i: <Receipt className="h-4 w-4" />, t: "Read-only account access" },
-    { i: <Star className="h-4 w-4" />, t: "4.9/5 average rating" },
+    { i: <Receipt className="h-4 w-4" />, t: "Read-only account access via Plaid" },
+    { i: <Wallet className="h-4 w-4" />, t: "Payments processed by Stripe" },
   ];
   return (
     <section className="border-y bg-muted/30">
-      <div className="mx-auto grid max-w-7xl grid-cols-2 gap-6 px-6 py-6 text-sm text-muted-foreground md:grid-cols-4">
+      <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-center gap-x-10 gap-y-4 px-6 py-6 text-sm text-muted-foreground">
         {items.map((x) => (
-          <div key={x.t} className="flex items-center justify-center gap-2 font-medium">
+          <div key={x.t} className="flex items-center gap-2 font-medium">
             <span className="text-primary">{x.i}</span>
             {x.t}
           </div>
@@ -202,24 +200,26 @@ function TrustBar() {
 function HowItWorks() {
   const steps = [
     { i: <Plug className="h-5 w-5" />, t: "Connect accounts via Plaid", d: "Securely link your bank, credit cards, and payment apps in 30 seconds." },
-    { i: <Brain className="h-5 w-5" />, t: "AI categorizes every transaction", d: "Our model maps each charge to the correct IRS Schedule C line with 96% accuracy." },
+    { i: <Brain className="h-5 w-5" />, t: "Every charge gets mapped to a Schedule C line", d: "Each transaction is matched against IRS categories and flagged for your review — nothing gets auto-approved without you seeing it." },
     { i: <FileDown className="h-5 w-5" />, t: "Export Schedule C", d: "Download an IRS-ready PDF, send to TurboTax, QuickBooks, or your CPA." },
   ];
   return (
     <section id="how" className="mx-auto max-w-7xl px-6 py-24">
       <SectionHeader eyebrow="How it works" title="From bank statement to tax return in three steps." />
-      <div className="mt-12 grid gap-6 md:grid-cols-3">
+      <div className="mt-14 space-y-0">
         {steps.map((s, i) => (
-          <Card key={s.t} className="relative p-6">
-            <div className="absolute -top-3 left-6 rounded-full bg-primary px-2.5 py-0.5 text-xs font-semibold text-primary-foreground">
-              Step {i + 1}
+          <div key={s.t} className="flex gap-6 border-t py-8 first:border-t-0 md:gap-10">
+            <div className="flex-shrink-0">
+              <span className="font-mono-nums text-sm text-muted-foreground">0{i + 1}</span>
             </div>
-            <div className="mt-2 flex h-10 w-10 items-center justify-center rounded-lg bg-primary-soft text-primary">
+            <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-primary-soft text-primary">
               {s.i}
             </div>
-            <h3 className="mt-4 text-lg font-semibold">{s.t}</h3>
-            <p className="mt-2 text-sm text-muted-foreground">{s.d}</p>
-          </Card>
+            <div>
+              <h3 className="text-lg font-semibold">{s.t}</h3>
+              <p className="mt-1.5 max-w-xl text-sm text-muted-foreground">{s.d}</p>
+            </div>
+          </div>
         ))}
       </div>
     </section>
@@ -228,17 +228,26 @@ function HowItWorks() {
 
 function WhatWeFind() {
   const items = [
-    { i: <Home className="h-5 w-5" />, t: "Home office", d: "Rent, utilities, and a portion of your internet — calculated by square footage." },
-    { i: <Cloud className="h-5 w-5" />, t: "Software & subscriptions", d: "Adobe, Notion, AWS, and the 47 other tools you forgot about." },
-    { i: <Car className="h-5 w-5" />, t: "Mileage", d: "Auto-tracked rideshare and gas, converted to IRS standard mileage rate." },
+    { i: <Cloud className="h-6 w-6" />, t: "Software & subscriptions", d: "Adobe, Notion, AWS, and the tools you forgot you were even paying for.", big: true },
+    { i: <Home className="h-5 w-5" />, t: "Home office", d: "Rent, utilities, and internet — calculated by square footage." },
+    { i: <Car className="h-5 w-5" />, t: "Mileage", d: "Rideshare and gas, converted to IRS standard mileage rate." },
     { i: <Utensils className="h-5 w-5" />, t: "Meals & travel", d: "Client lunches, conferences, hotels — at the right deductible percentage." },
   ];
   return (
     <section id="find" className="bg-muted/30 py-24">
       <div className="mx-auto max-w-7xl px-6">
         <SectionHeader eyebrow="What we find" title="The deductions you're leaving on the table." />
-        <div className="mt-12 grid gap-5 md:grid-cols-2 lg:grid-cols-4">
-          {items.map((x) => (
+        <div className="mt-12 grid gap-5 md:grid-cols-2">
+          <Card className="p-7 md:row-span-3 md:flex md:flex-col md:justify-center">
+            <div>
+              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary-soft text-primary">
+                {items[0].i}
+              </div>
+              <h3 className="mt-5 text-xl font-semibold">{items[0].t}</h3>
+              <p className="mt-2 max-w-xs text-sm text-muted-foreground">{items[0].d}</p>
+            </div>
+          </Card>
+          {items.slice(1).map((x) => (
             <Card key={x.t} className="p-6">
               <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary-soft text-primary">
                 {x.i}
@@ -364,36 +373,25 @@ function Pricing() {
   );
 }
 
-function Testimonials() {
-  const t = [
-    { n: "Maya P.", r: "Freelance designer", q: "TaxScout found $6,800 in deductions I would have missed. I made my annual fee back in the first hour." },
-    { n: "Devon K.", r: "Independent developer", q: "I used to dread Q4. Now I just hit export and email it to my CPA. It's almost too easy." },
-    { n: "Sara L.", r: "Marketing consultant", q: "The AI caught subscriptions on three different cards I had completely forgotten about. $1,400 right there." },
+function WhyTaxScout() {
+  const points = [
+    { t: "No double-entry bookkeeping", d: "Built for solo freelancers, not accountants. No chart of accounts, no journal entries — just your expenses, categorized." },
+    { t: "Every category is explainable", d: "Nothing gets auto-approved into your tax return. Every match is flagged for your review with the reasoning shown, so you stay in control." },
+    { t: "You own your data", d: "Export to CSV, TurboTax, or QuickBooks anytime. Cancel anytime and keep access to your history for 30 days." },
   ];
   return (
-    <section className="bg-muted/30 py-24">
+    <section className="py-24">
       <div className="mx-auto max-w-7xl px-6">
-        <SectionHeader eyebrow="Loved by freelancers" title="What our customers say." />
-        <div className="mt-12 grid gap-6 md:grid-cols-3">
-          {t.map((x) => (
-            <Card key={x.n} className="p-6">
-              <div className="flex gap-0.5 text-primary">
-                {Array.from({ length: 5 }).map((_, i) => (
-                  <Star key={i} className="h-4 w-4 fill-current" />
-                ))}
+        <div className="grid gap-12 lg:grid-cols-[0.8fr_1.2fr] lg:items-start">
+          <SectionHeader eyebrow="Why TaxScout" title="Built for one person: you." align="left" />
+          <div className="grid gap-8 sm:grid-cols-2">
+            {points.map((p) => (
+              <div key={p.t} className="border-l-2 border-primary/30 pl-5">
+                <h3 className="font-semibold">{p.t}</h3>
+                <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">{p.d}</p>
               </div>
-              <p className="mt-4 text-sm leading-relaxed text-foreground">"{x.q}"</p>
-              <div className="mt-5 flex items-center gap-3">
-                <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary-soft text-sm font-semibold text-primary">
-                  {x.n[0]}
-                </div>
-                <div>
-                  <div className="text-sm font-semibold">{x.n}</div>
-                  <div className="text-xs text-muted-foreground">{x.r}</div>
-                </div>
-              </div>
-            </Card>
-          ))}
+            ))}
+          </div>
         </div>
       </div>
     </section>
@@ -437,10 +435,9 @@ function Footer() {
             <span className="text-sm text-muted-foreground">© 2026</span>
           </div>
           <nav className="flex flex-wrap gap-6 text-sm text-muted-foreground">
-            <a href="#" className="hover:text-foreground">Privacy</a>
-            <a href="#" className="hover:text-foreground">Terms</a>
-            <a href="#" className="hover:text-foreground">Security</a>
-            <a href="#" className="hover:text-foreground">Contact</a>
+            <Link to="/privacy" className="hover:text-foreground">Privacy</Link>
+            <Link to="/terms" className="hover:text-foreground">Terms</Link>
+            <a href="mailto:hello@taxscout.dev" className="hover:text-foreground">Contact</a>
           </nav>
         </div>
         <p className="mt-6 text-xs text-muted-foreground">
