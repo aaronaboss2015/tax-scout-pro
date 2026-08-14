@@ -30,6 +30,7 @@ function Quarterly() {
   const [deductions, setDeductions] = useState(0);
   const [deductionsSeeded, setDeductionsSeeded] = useState(false);
   const [state, setState] = useState("NY");
+  const [stateSeeded, setStateSeeded] = useState(false);
 
   useEffect(() => {
     if (!loading && !deductionsSeeded) {
@@ -37,6 +38,13 @@ function Quarterly() {
       setDeductionsSeeded(true);
     }
   }, [loading, deductionsSeeded, kpi.deductionsYTD]);
+
+  useEffect(() => {
+    if (!profileLoading && !stateSeeded) {
+      if (profile?.state) setState(profile.state);
+      setStateSeeded(true);
+    }
+  }, [profileLoading, stateSeeded, profile]);
 
   useEffect(() => {
     if (!profileLoading && !incomeSeeded) {

@@ -2,7 +2,7 @@ import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { useEffect } from "react";
 import {
   LayoutDashboard, Receipt, Tags, Calculator, FileDown,
-  Repeat, Settings, Sparkles, Bell, Search, ChevronDown, LogOut,
+  Repeat, Settings, Sparkles, Search, ChevronDown, LogOut,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import {
@@ -104,15 +104,18 @@ export function AppShell({ children, title }: { children: React.ReactNode; title
           <div className="ml-auto flex items-center gap-3">
             <div className="relative hidden md:block">
               <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <Input placeholder="Search transactions…" className="h-9 w-72 pl-9" />
+              <Input
+                placeholder="Search transactions…"
+                aria-label="Search transactions"
+                className="h-9 w-72 pl-9"
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    const q = e.currentTarget.value.trim();
+                    nav({ to: "/transactions", search: q ? { q } : undefined });
+                  }
+                }}
+              />
             </div>
-            <button className="flex h-9 items-center gap-1.5 rounded-md border px-3 text-sm font-medium hover:bg-muted">
-              Year: 2026 <ChevronDown className="h-3.5 w-3.5" />
-            </button>
-            <button className="relative flex h-9 w-9 items-center justify-center rounded-md hover:bg-muted">
-              <Bell className="h-4 w-4" />
-              <span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-primary" />
-            </button>
           </div>
         </header>
         <main className="flex-1 p-6 pb-24 md:pb-6">{children}</main>

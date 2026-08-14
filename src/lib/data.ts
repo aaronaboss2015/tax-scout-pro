@@ -139,6 +139,7 @@ export interface DbProfile {
   name: string | null;
   profession: string | null;
   city: string | null;
+  state: string | null;
   annual_income: number | null;
   stripe_customer_id: string | null;
   subscription_status: string | null;

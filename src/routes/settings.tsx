@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useCallback, useEffect, useState } from "react";
 import { AppShell } from "@/components/taxscout/AppShell";
 import { Card } from "@/components/ui/card";
@@ -11,8 +11,13 @@ import { CreditCard, Trash2, Building2, RefreshCw } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { supabase, authedFetch } from "@/lib/supabase";
 import { useProfile, buildCheckoutUrl } from "@/lib/data";
+import { STATE_CODES, STATE_TAX_RATES } from "@/lib/stateTax";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ConnectBankButton } from "@/components/taxscout/ConnectBankButton";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 export const Route = createFileRoute("/settings")({ component: Settings });
 
@@ -24,7 +29,41 @@ interface Institution {
 
 function Settings() {
   const { user } = useAuth();
-  const { profile, loading: profileLoading } = useProfile();
+  const nav = useNavigate();
+  const { profile, loading: profileLoading, refresh: refreshProfile } = useProfile();
+  const [taxState, setTaxState] = useState("");
+  const [taxStateSeeded, setTaxStateSeeded] = useState(false);
+  const [savingTaxProfile, setSavingTaxProfile] = useState(false);
+  const [taxProfileSaved, setTaxProfileSaved] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+
+  useEffect(() => {
+    if (!profileLoading && !taxStateSeeded) {
+      setTaxState(profile?.state ?? "");
+      setTaxStateSeeded(true);
+    }
+  }, [profileLoading, taxStateSeeded, profile]);
+
+  async function handleSaveTaxProfile() {
+    if (!user) return;
+    setSavingTaxProfile(true);
+    setTaxProfileSaved(false);
+    await supabase.from("profiles").update({ state: taxState || null }).eq("id", user.id);
+    await refreshProfile();
+    setSavingTaxProfile(false);
+    setTaxProfileSaved(true);
+  }
+
+  async function handleDeleteAccount() {
+    setDeleting(true);
+    const res = await authedFetch("/api/delete-account", { method: "POST" });
+    if (res.ok) {
+      await supabase.auth.signOut();
+      nav({ to: "/" });
+    } else {
+      setDeleting(false);
+    }
+  }
   const [institutions, setInstitutions] = useState<Institution[]>([]);
   const [syncing, setSyncing] = useState(false);
   const [syncMessage, setSyncMessage] = useState<string | null>(null);
@@ -88,20 +127,25 @@ function Settings() {
 
         <Card className="p-6">
           <h3 className="font-semibold">Tax profile</h3>
+          <p className="mt-1 text-xs text-muted-foreground">Used to default your state in the quarterly tax estimator.</p>
           <div className="mt-4 grid gap-4 sm:grid-cols-3">
             <div>
-              <Label>Filing status</Label>
-              <Select defaultValue="single"><SelectTrigger className="mt-1.5"><SelectValue /></SelectTrigger>
-                <SelectContent>{["single", "married", "hoh"].map(s => <SelectItem key={s} value={s}>{s.toUpperCase()}</SelectItem>)}</SelectContent>
-              </Select>
-            </div>
-            <div>
               <Label>State</Label>
-              <Select defaultValue="ny"><SelectTrigger className="mt-1.5"><SelectValue /></SelectTrigger>
-                <SelectContent>{["ny","ca","tx","fl","wa"].map(s => <SelectItem key={s} value={s}>{s.toUpperCase()}</SelectItem>)}</SelectContent>
+              <Select value={taxState || undefined} onValueChange={setTaxState}>
+                <SelectTrigger className="mt-1.5"><SelectValue placeholder="Select a state" /></SelectTrigger>
+                <SelectContent>
+                  {STATE_CODES.map(code => (
+                    <SelectItem key={code} value={code}>{STATE_TAX_RATES[code].name}</SelectItem>
+                  ))}
+                </SelectContent>
               </Select>
             </div>
-            <div><Label>Dependents</Label><Input className="mt-1.5" type="number" defaultValue={0} /></div>
+          </div>
+          <div className="mt-4 flex items-center gap-3">
+            <Button onClick={handleSaveTaxProfile} disabled={savingTaxProfile} variant="outline">
+              {savingTaxProfile ? "Saving…" : "Save"}
+            </Button>
+            {taxProfileSaved && <span className="text-sm text-muted-foreground">Saved.</span>}
           </div>
         </Card>
 
@@ -176,9 +220,10 @@ function Settings() {
 
         <Card className="p-6">
           <h3 className="font-semibold">Notifications</h3>
+          <p className="mt-1 text-xs text-muted-foreground">Not available yet — we don't send any emails or push notifications currently.</p>
           <div className="mt-4 space-y-3">
             {["Quarterly tax reminders", "New deductions found weekly", "Subscription auto-detected", "Product updates"].map(n => (
-              <div key={n} className="flex items-center justify-between"><span className="text-sm">{n}</span><Switch defaultChecked /></div>
+              <div key={n} className="flex items-center justify-between opacity-60"><span className="text-sm">{n}</span><Switch disabled /></div>
             ))}
           </div>
         </Card>
@@ -189,9 +234,33 @@ function Settings() {
           <div className="flex items-center justify-between">
             <div>
               <div className="font-medium">Delete account</div>
-              <div className="text-xs text-muted-foreground">All data is permanently erased after 30 days.</div>
+              <div className="text-xs text-muted-foreground">Immediately and permanently deletes your account and all data. This cannot be undone.</div>
             </div>
-            <Button variant="outline" className="border-destructive text-destructive hover:bg-destructive/10"><Trash2 className="mr-1.5 h-4 w-4" /> Delete</Button>
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button variant="outline" className="border-destructive text-destructive hover:bg-destructive/10">
+                  <Trash2 className="mr-1.5 h-4 w-4" /> Delete
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Delete your account?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    This permanently deletes your account, all transactions, and all linked bank connections. This cannot be undone.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel disabled={deleting}>Cancel</AlertDialogCancel>
+                  <AlertDialogAction
+                    onClick={handleDeleteAccount}
+                    disabled={deleting}
+                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                  >
+                    {deleting ? "Deleting…" : "Delete my account"}
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           </div>
         </Card>
       </div>

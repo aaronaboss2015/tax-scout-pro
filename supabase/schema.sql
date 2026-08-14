@@ -6,6 +6,7 @@ create table if not exists public.profiles (
   name text,
   profession text,
   city text,
+  state text,
   annual_income numeric,
   stripe_customer_id text,
   subscription_status text,

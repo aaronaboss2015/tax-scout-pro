@@ -23,6 +23,7 @@ import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as CategoriesRouteImport } from './routes/categories'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ApiStripeWebhookRouteImport } from './routes/api/stripe-webhook'
+import { Route as ApiDeleteAccountRouteImport } from './routes/api/delete-account'
 import { Route as ApiPlaidSyncRouteImport } from './routes/api/plaid/sync'
 import { Route as ApiPlaidInstitutionsRouteImport } from './routes/api/plaid/institutions'
 import { Route as ApiPlaidExchangeTokenRouteImport } from './routes/api/plaid/exchange-token'
@@ -98,6 +99,11 @@ const ApiStripeWebhookRoute = ApiStripeWebhookRouteImport.update({
   path: '/api/stripe-webhook',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiDeleteAccountRoute = ApiDeleteAccountRouteImport.update({
+  id: '/api/delete-account',
+  path: '/api/delete-account',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPlaidSyncRoute = ApiPlaidSyncRouteImport.update({
   id: '/api/plaid/sync',
   path: '/api/plaid/sync',
@@ -133,6 +139,7 @@ export interface FileRoutesByFullPath {
   '/subscriptions': typeof SubscriptionsRoute
   '/terms': typeof TermsRoute
   '/transactions': typeof TransactionsRoute
+  '/api/delete-account': typeof ApiDeleteAccountRoute
   '/api/stripe-webhook': typeof ApiStripeWebhookRoute
   '/api/plaid/create-link-token': typeof ApiPlaidCreateLinkTokenRoute
   '/api/plaid/exchange-token': typeof ApiPlaidExchangeTokenRoute
@@ -153,6 +160,7 @@ export interface FileRoutesByTo {
   '/subscriptions': typeof SubscriptionsRoute
   '/terms': typeof TermsRoute
   '/transactions': typeof TransactionsRoute
+  '/api/delete-account': typeof ApiDeleteAccountRoute
   '/api/stripe-webhook': typeof ApiStripeWebhookRoute
   '/api/plaid/create-link-token': typeof ApiPlaidCreateLinkTokenRoute
   '/api/plaid/exchange-token': typeof ApiPlaidExchangeTokenRoute
@@ -174,6 +182,7 @@ export interface FileRoutesById {
   '/subscriptions': typeof SubscriptionsRoute
   '/terms': typeof TermsRoute
   '/transactions': typeof TransactionsRoute
+  '/api/delete-account': typeof ApiDeleteAccountRoute
   '/api/stripe-webhook': typeof ApiStripeWebhookRoute
   '/api/plaid/create-link-token': typeof ApiPlaidCreateLinkTokenRoute
   '/api/plaid/exchange-token': typeof ApiPlaidExchangeTokenRoute
@@ -196,6 +205,7 @@ export interface FileRouteTypes {
     | '/subscriptions'
     | '/terms'
     | '/transactions'
+    | '/api/delete-account'
     | '/api/stripe-webhook'
     | '/api/plaid/create-link-token'
     | '/api/plaid/exchange-token'
@@ -216,6 +226,7 @@ export interface FileRouteTypes {
     | '/subscriptions'
     | '/terms'
     | '/transactions'
+    | '/api/delete-account'
     | '/api/stripe-webhook'
     | '/api/plaid/create-link-token'
     | '/api/plaid/exchange-token'
@@ -236,6 +247,7 @@ export interface FileRouteTypes {
     | '/subscriptions'
     | '/terms'
     | '/transactions'
+    | '/api/delete-account'
     | '/api/stripe-webhook'
     | '/api/plaid/create-link-token'
     | '/api/plaid/exchange-token'
@@ -257,6 +269,7 @@ export interface RootRouteChildren {
   SubscriptionsRoute: typeof SubscriptionsRoute
   TermsRoute: typeof TermsRoute
   TransactionsRoute: typeof TransactionsRoute
+  ApiDeleteAccountRoute: typeof ApiDeleteAccountRoute
   ApiStripeWebhookRoute: typeof ApiStripeWebhookRoute
   ApiPlaidCreateLinkTokenRoute: typeof ApiPlaidCreateLinkTokenRoute
   ApiPlaidExchangeTokenRoute: typeof ApiPlaidExchangeTokenRoute
@@ -364,6 +377,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiStripeWebhookRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/delete-account': {
+      id: '/api/delete-account'
+      path: '/api/delete-account'
+      fullPath: '/api/delete-account'
+      preLoaderRoute: typeof ApiDeleteAccountRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/plaid/sync': {
       id: '/api/plaid/sync'
       path: '/api/plaid/sync'
@@ -409,6 +429,7 @@ const rootRouteChildren: RootRouteChildren = {
   SubscriptionsRoute: SubscriptionsRoute,
   TermsRoute: TermsRoute,
   TransactionsRoute: TransactionsRoute,
+  ApiDeleteAccountRoute: ApiDeleteAccountRoute,
   ApiStripeWebhookRoute: ApiStripeWebhookRoute,
   ApiPlaidCreateLinkTokenRoute: ApiPlaidCreateLinkTokenRoute,
   ApiPlaidExchangeTokenRoute: ApiPlaidExchangeTokenRoute,

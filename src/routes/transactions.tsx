@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
+import { z } from "zod";
 import { AppShell } from "@/components/taxscout/AppShell";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -13,14 +14,18 @@ import { Search, Filter, Plus } from "lucide-react";
 import { useTransactions, addTransaction, setTransactionStatus, CATEGORIES, type DbTransaction, type Status } from "@/lib/data";
 import { ConfidenceBadge } from "./dashboard";
 
-export const Route = createFileRoute("/transactions")({ component: Transactions });
+export const Route = createFileRoute("/transactions")({
+  component: Transactions,
+  validateSearch: z.object({ q: z.string().optional() }),
+});
 
 const FILTERS = ["All", "Deductible", "Personal", "Needs Review"] as const;
 
 function Transactions() {
+  const { q: initialQ } = Route.useSearch();
   const { transactions, loading, refresh } = useTransactions();
   const [filter, setFilter] = useState<(typeof FILTERS)[number]>("All");
-  const [q, setQ] = useState("");
+  const [q, setQ] = useState(initialQ ?? "");
   const [active, setActive] = useState<DbTransaction | null>(null);
   const [addOpen, setAddOpen] = useState(false);
 

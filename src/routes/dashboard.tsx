@@ -7,7 +7,7 @@ import {
   PieChart, Pie, Cell, ResponsiveContainer, Tooltip,
   XAxis, YAxis, CartesianGrid, Area, AreaChart,
 } from "recharts";
-import { TrendingUp, DollarSign, CheckCircle2, Activity, Check, X, HelpCircle } from "lucide-react";
+import { TrendingUp, DollarSign, CheckCircle2, Activity, Check, X } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { useTransactions, categoryTotals, monthlyTrend, computeKPI, reviewQueue, setTransactionStatus, type Status } from "@/lib/data";
 
@@ -32,7 +32,7 @@ function Dashboard() {
     { label: "Deductions found YTD", value: `$${kpi.deductionsYTD.toLocaleString()}`, icon: DollarSign, accent: "text-primary" },
     { label: "Estimated tax saved", value: `$${kpi.taxSaved.toLocaleString()}`, delta: "Based on 25% bracket", icon: TrendingUp, accent: "text-primary" },
     { label: "Transactions reviewed", value: kpi.reviewed.toLocaleString(), icon: Activity, accent: "" },
-    { label: "AI confidence", value: kpi.reviewed ? `${kpi.confidence}%` : "—", icon: CheckCircle2, accent: "text-primary" },
+    { label: "Match confidence", value: kpi.reviewed ? `${kpi.confidence}%` : "—", icon: CheckCircle2, accent: "text-primary" },
   ];
 
   async function handleReviewAction(id: string, status: Status) {
@@ -162,9 +162,8 @@ function Dashboard() {
                   </div>
                   <div className="ml-4 flex items-center gap-2">
                     <span className="font-semibold tabular-nums">${t.amount.toFixed(2)}</span>
-                    <Button size="icon" variant="outline" className="h-8 w-8 text-primary" onClick={() => handleReviewAction(t.id, "deductible")}><Check className="h-4 w-4" /></Button>
-                    <Button size="icon" variant="outline" className="h-8 w-8 text-muted-foreground" onClick={() => handleReviewAction(t.id, "personal")}><X className="h-4 w-4" /></Button>
-                    <Button size="icon" variant="outline" className="h-8 w-8 text-muted-foreground"><HelpCircle className="h-4 w-4" /></Button>
+                    <Button size="icon" variant="outline" className="h-8 w-8 text-primary" aria-label="Mark deductible" onClick={() => handleReviewAction(t.id, "deductible")}><Check className="h-4 w-4" /></Button>
+                    <Button size="icon" variant="outline" className="h-8 w-8 text-muted-foreground" aria-label="Mark personal" onClick={() => handleReviewAction(t.id, "personal")}><X className="h-4 w-4" /></Button>
                   </div>
                 </div>
               ))}

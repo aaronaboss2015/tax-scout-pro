@@ -7,5 +7,6 @@
   "vars": {
     "VITE_SUPABASE_URL": "https://hdrwbgpskjaextwbdtgc.supabase.co",
     "PLAID_ENV": "sandbox",
+    "VITE_PLAID_ENV": "sandbox",
   },
 }

@@ -322,9 +322,9 @@ function Pricing() {
   }
 
   const tiers = [
-    { name: "Free trial", price: "$0", per: "for 14 days", desc: "Full access. No card required.", cta: "Start trial", features: ["Unlimited transactions", "AI categorization", "Schedule C preview"], href: "/signup" as const },
-    { name: "Monthly", price: "$19", per: "/ month", desc: "Cancel anytime.", cta: user ? "Choose monthly" : "Sign up to subscribe", features: ["Everything in trial", "Quarterly tax estimator", "Schedule C export", "Email support"], href: checkoutHref("monthly") },
-    { name: "Annual", price: "$99", per: "/ year", desc: "Save $129 vs monthly.", cta: user ? "Choose annual" : "Sign up to subscribe", features: ["Everything in monthly", "Audit support", "CPA handoff", "Priority support"], featured: true, href: checkoutHref("annual") },
+    { name: "Free trial", price: "$0", per: "for 14 days", desc: "Full access. No card required.", cta: "Start trial", features: ["Unlimited transactions", "Automatic categorization", "Schedule C preview"], href: "/signup" as const },
+    { name: "Monthly", price: "$19", per: "/ month", desc: "Cancel anytime.", cta: user ? "Choose monthly" : "Sign up to subscribe", features: ["Everything in trial", "Quarterly tax estimator", "Schedule C export", "Bank sync via Plaid"], href: checkoutHref("monthly") },
+    { name: "Annual", price: "$99", per: "/ year", desc: "Save $129 vs monthly.", cta: user ? "Choose annual" : "Sign up to subscribe", features: ["Everything in monthly", "2 months free vs. monthly", "Same features, lower price"], featured: true, href: checkoutHref("annual") },
   ];
   return (
     <section id="pricing" className="mx-auto max-w-7xl px-6 py-24">
@@ -400,12 +400,12 @@ function WhyTaxScout() {
 
 function FAQ() {
   const faqs = [
-    ["Is my financial data safe?", "Yes. We use bank-level 256-bit encryption and read-only Plaid connections. We never see or store your login credentials."],
-    ["What if I get audited?", "Annual plan includes audit support — we'll provide documentation for every deduction we found and a CPA will help you respond to the IRS."],
-    ["Can I cancel anytime?", "Yes. Cancel from your billing portal in one click. Your data stays accessible for 30 days after cancellation."],
-    ["Do you support state taxes?", "Yes. We calculate state income tax for all 50 states based on the address in your tax profile."],
-    ["Does it work with TurboTax?", "Yes. Export a CSV that imports directly into TurboTax Self-Employed, plus QuickBooks .QBO and IRS Schedule C PDF."],
-    ["What if the AI gets a category wrong?", "Click any transaction to see the AI's reasoning, then re-categorize in one tap. The model learns from your corrections."],
+    ["Is my financial data safe?", "Yes. We use bank-level encryption and read-only Plaid connections. We never see or store your bank login credentials."],
+    ["What if I get audited?", "Every deduction includes a plain-language note explaining why it was categorized that way, which you can export and share with a CPA. We don't currently offer direct audit representation."],
+    ["Can I cancel anytime?", "Yes. Cancel from Settings in one click. Your data stays accessible for 30 days after cancellation."],
+    ["Do you support state taxes?", "Yes — the quarterly estimator lets you select your state and applies an approximate rate. It's a planning estimate, not a substitute for real tax software."],
+    ["Does it work with TurboTax?", "Yes, via CSV export. QuickBooks .QBO export isn't available yet."],
+    ["What if the categorization gets it wrong?", "Click any transaction to see the reasoning behind its category, then mark it deductible or personal yourself. Nothing gets filed without your review."],
     ["How is this different from QuickBooks?", "We're built specifically for solo freelancers — no double-entry bookkeeping, no chart of accounts. Just deductions, fast."],
     ["Is there a contract?", "No. Monthly is month-to-month, annual is one year. Both can be cancelled anytime."],
   ];

@@ -49,9 +49,15 @@ export function ConnectBankButton({ onConnected }: { onConnected: () => void }) 
   });
 
   const busy = status === "loading" || status === "syncing";
+  const isSandbox = import.meta.env.VITE_PLAID_ENV !== "production";
 
   return (
     <div>
+      {isSandbox && (
+        <p className="mb-2 text-xs text-warning">
+          Test mode — real banks aren't connectable yet. Use Plaid's sample "First Platypus Bank" login to try this out.
+        </p>
+      )}
       <Button
         variant="outline"
         className="w-full"
