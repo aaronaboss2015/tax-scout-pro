@@ -2,8 +2,17 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { AuthShell } from "./login";
 import { supabase } from "@/lib/supabase";
+import { track } from "@/lib/track";
 
-export const Route = createFileRoute("/signup")({ component: Signup });
+export const Route = createFileRoute("/signup")({
+  head: () => ({
+    meta: [
+      { title: "Start free trial — TaxScout" },
+      { name: "description", content: "Start your 14-day TaxScout trial. No credit card required." },
+    ],
+  }),
+  component: Signup,
+});
 
 function Signup() {
   const nav = useNavigate();
@@ -15,12 +24,14 @@ function Signup() {
   async function handleSubmit() {
     setError(null);
     setLoading(true);
+    track("signup_started");
     const { error } = await supabase.auth.signUp({ email, password });
     setLoading(false);
     if (error) {
       setError(error.message);
       return;
     }
+    track("signup_completed");
     nav({ to: "/onboarding" });
   }
 

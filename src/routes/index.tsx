@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Sparkles,
   ShieldCheck,
@@ -19,6 +19,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/lib/auth";
 import { buildCheckoutUrl } from "@/lib/data";
+import { track } from "@/lib/track";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -34,6 +35,10 @@ export const Route = createFileRoute("/")({
 });
 
 function Landing() {
+  useEffect(() => {
+    track("landing_page_view");
+  }, []);
+
   return (
     <div className="min-h-screen bg-background text-foreground">
       <Nav />
@@ -106,9 +111,9 @@ function Hero() {
                 Start 14-day free trial <ArrowRight className="ml-1 h-4 w-4" />
               </Button>
             </Link>
-            <a href="#how">
-              <Button size="lg" variant="outline">See how it works</Button>
-            </a>
+            <Link to="/demo">
+              <Button size="lg" variant="outline">See a live demo</Button>
+            </Link>
           </div>
           <div className="mt-6 flex items-center gap-4 text-sm text-muted-foreground">
             <span className="flex items-center gap-1"><Check className="h-4 w-4 text-primary" /> No credit card</span>
@@ -199,13 +204,14 @@ function TrustBar() {
 
 function HowItWorks() {
   const steps = [
-    { i: <Plug className="h-5 w-5" />, t: "Connect accounts via Plaid", d: "Securely link your bank, credit cards, and payment apps in 30 seconds." },
-    { i: <Brain className="h-5 w-5" />, t: "Every charge gets mapped to a Schedule C line", d: "Each transaction is matched against IRS categories and flagged for your review — nothing gets auto-approved without you seeing it." },
-    { i: <FileDown className="h-5 w-5" />, t: "Export Schedule C", d: "Download an IRS-ready PDF, send to TurboTax, QuickBooks, or your CPA." },
+    { i: <Plug className="h-5 w-5" />, t: "Connect your accounts", d: "Securely link your bank, credit cards, and payment apps via Plaid — read-only, we never see your login." },
+    { i: <Brain className="h-5 w-5" />, t: "Transactions get matched to Schedule C lines", d: "Each charge is matched against IRS categories based on the transaction itself." },
+    { i: <Check className="h-5 w-5" />, t: "You review and approve — nothing is automatic", d: "Every match is flagged \"potentially deductible\" with the reasoning shown. You mark it deductible, personal, or leave it for later. Nothing gets exported without your say." },
+    { i: <FileDown className="h-5 w-5" />, t: "Export what you approved", d: "CSV for TurboTax, or a printable Schedule C summary — built from transactions you actually confirmed." },
   ];
   return (
     <section id="how" className="mx-auto max-w-7xl px-6 py-24">
-      <SectionHeader eyebrow="How it works" title="From bank statement to tax return in three steps." />
+      <SectionHeader eyebrow="How it works" title="From bank statement to tax-ready summary, with you in control." />
       <div className="mt-14 space-y-0">
         {steps.map((s, i) => (
           <div key={s.t} className="flex gap-6 border-t py-8 first:border-t-0 md:gap-10">
@@ -360,7 +366,7 @@ function Pricing() {
                 </Button>
               </Link>
             ) : (
-              <a href={t.href} className="mt-7 block">
+              <a href={t.href} className="mt-7 block" onClick={() => track("checkout_clicked", { plan: t.name })}>
                 <Button className={`w-full ${t.featured ? "bg-primary text-primary-foreground hover:bg-primary/90" : ""}`} variant={t.featured ? "default" : "outline"}>
                   {t.cta}
                 </Button>

@@ -7,7 +7,15 @@ import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
 import { supabase } from "@/lib/supabase";
 
-export const Route = createFileRoute("/login")({ component: Login });
+export const Route = createFileRoute("/login")({
+  head: () => ({
+    meta: [
+      { title: "Sign in — TaxScout" },
+      { name: "description", content: "Sign in to your TaxScout account." },
+    ],
+  }),
+  component: Login,
+});
 
 function Login() {
   const nav = useNavigate();

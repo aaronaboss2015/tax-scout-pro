@@ -1,7 +1,15 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Sparkles } from "lucide-react";
 
-export const Route = createFileRoute("/terms")({ component: Terms });
+export const Route = createFileRoute("/terms")({
+  head: () => ({
+    meta: [
+      { title: "Terms — TaxScout" },
+      { name: "description", content: "TaxScout's terms of service: billing, cancellation, and what the product is and isn't." },
+    ],
+  }),
+  component: Terms,
+});
 
 function Terms() {
   return (

@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/select";
 import { supabase } from "@/lib/supabase";
 import { ConnectBankButton } from "@/components/taxscout/ConnectBankButton";
+import { track } from "@/lib/track";
 
 export const Route = createFileRoute("/onboarding")({ component: Onboarding });
 
@@ -40,6 +41,7 @@ function Onboarding() {
           .update({ annual_income: INCOME_RANGES[incomePick].estimate })
           .eq("id", user.id);
       }
+      track("onboarding_completed");
       nav({ to: "/dashboard" });
       return;
     }

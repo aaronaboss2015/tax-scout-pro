@@ -13,6 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Search, Filter, Plus } from "lucide-react";
 import { useTransactions, addTransaction, setTransactionStatus, CATEGORIES, type DbTransaction, type Status } from "@/lib/data";
 import { ConfidenceBadge } from "./dashboard";
+import { track } from "@/lib/track";
 
 export const Route = createFileRoute("/transactions")({
   component: Transactions,
@@ -167,6 +168,7 @@ function AddTransactionDialog({ open, onOpenChange, onAdded }: { open: boolean; 
     setError(null);
     try {
       await addTransaction({ date, merchant: merchant.trim(), amount: amt, category: cat.name, irs_line: cat.line, status });
+      track("transaction_added", { category: cat.name });
       setMerchant("");
       setAmount("");
       onOpenChange(false);

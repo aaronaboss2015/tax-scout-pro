@@ -1,0 +1,13 @@
+User-agent: *
+Allow: /
+Disallow: /dashboard
+Disallow: /transactions
+Disallow: /categories
+Disallow: /quarterly
+Disallow: /export
+Disallow: /subscriptions
+Disallow: /settings
+Disallow: /onboarding
+Disallow: /api/
+
+Sitemap: https://taxscout.dev/sitemap.xml

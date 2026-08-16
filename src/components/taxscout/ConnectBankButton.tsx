@@ -3,6 +3,7 @@ import { usePlaidLink } from "react-plaid-link";
 import { Button } from "@/components/ui/button";
 import { Building2 } from "lucide-react";
 import { authedFetch } from "@/lib/supabase";
+import { track } from "@/lib/track";
 
 export function ConnectBankButton({ onConnected }: { onConnected: () => void }) {
   const [linkToken, setLinkToken] = useState<string | null>(null);
@@ -34,6 +35,7 @@ export function ConnectBankButton({ onConnected }: { onConnected: () => void }) 
         if (!syncRes.ok) throw new Error("Linked, but the first sync failed.");
 
         setStatus("idle");
+        track("bank_connected", { institution: metadata.institution?.name });
         onConnected();
       } catch (e) {
         setStatus("error");

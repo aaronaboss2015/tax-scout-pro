@@ -19,6 +19,7 @@ import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as OnboardingRouteImport } from './routes/onboarding'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as ExportRouteImport } from './routes/export'
+import { Route as DemoRouteImport } from './routes/demo'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as CategoriesRouteImport } from './routes/categories'
 import { Route as IndexRouteImport } from './routes/index'
@@ -27,6 +28,7 @@ import { Route as ApiDeleteAccountRouteImport } from './routes/api/delete-accoun
 import { Route as ApiPlaidSyncRouteImport } from './routes/api/plaid/sync'
 import { Route as ApiPlaidInstitutionsRouteImport } from './routes/api/plaid/institutions'
 import { Route as ApiPlaidExchangeTokenRouteImport } from './routes/api/plaid/exchange-token'
+import { Route as ApiPlaidDisconnectRouteImport } from './routes/api/plaid/disconnect'
 import { Route as ApiPlaidCreateLinkTokenRouteImport } from './routes/api/plaid/create-link-token'
 
 const TransactionsRoute = TransactionsRouteImport.update({
@@ -79,6 +81,11 @@ const ExportRoute = ExportRouteImport.update({
   path: '/export',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DemoRoute = DemoRouteImport.update({
+  id: '/demo',
+  path: '/demo',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const DashboardRoute = DashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
@@ -119,6 +126,11 @@ const ApiPlaidExchangeTokenRoute = ApiPlaidExchangeTokenRouteImport.update({
   path: '/api/plaid/exchange-token',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPlaidDisconnectRoute = ApiPlaidDisconnectRouteImport.update({
+  id: '/api/plaid/disconnect',
+  path: '/api/plaid/disconnect',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPlaidCreateLinkTokenRoute = ApiPlaidCreateLinkTokenRouteImport.update({
   id: '/api/plaid/create-link-token',
   path: '/api/plaid/create-link-token',
@@ -129,6 +141,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/categories': typeof CategoriesRoute
   '/dashboard': typeof DashboardRoute
+  '/demo': typeof DemoRoute
   '/export': typeof ExportRoute
   '/login': typeof LoginRoute
   '/onboarding': typeof OnboardingRoute
@@ -142,6 +155,7 @@ export interface FileRoutesByFullPath {
   '/api/delete-account': typeof ApiDeleteAccountRoute
   '/api/stripe-webhook': typeof ApiStripeWebhookRoute
   '/api/plaid/create-link-token': typeof ApiPlaidCreateLinkTokenRoute
+  '/api/plaid/disconnect': typeof ApiPlaidDisconnectRoute
   '/api/plaid/exchange-token': typeof ApiPlaidExchangeTokenRoute
   '/api/plaid/institutions': typeof ApiPlaidInstitutionsRoute
   '/api/plaid/sync': typeof ApiPlaidSyncRoute
@@ -150,6 +164,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/categories': typeof CategoriesRoute
   '/dashboard': typeof DashboardRoute
+  '/demo': typeof DemoRoute
   '/export': typeof ExportRoute
   '/login': typeof LoginRoute
   '/onboarding': typeof OnboardingRoute
@@ -163,6 +178,7 @@ export interface FileRoutesByTo {
   '/api/delete-account': typeof ApiDeleteAccountRoute
   '/api/stripe-webhook': typeof ApiStripeWebhookRoute
   '/api/plaid/create-link-token': typeof ApiPlaidCreateLinkTokenRoute
+  '/api/plaid/disconnect': typeof ApiPlaidDisconnectRoute
   '/api/plaid/exchange-token': typeof ApiPlaidExchangeTokenRoute
   '/api/plaid/institutions': typeof ApiPlaidInstitutionsRoute
   '/api/plaid/sync': typeof ApiPlaidSyncRoute
@@ -172,6 +188,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/categories': typeof CategoriesRoute
   '/dashboard': typeof DashboardRoute
+  '/demo': typeof DemoRoute
   '/export': typeof ExportRoute
   '/login': typeof LoginRoute
   '/onboarding': typeof OnboardingRoute
@@ -185,6 +202,7 @@ export interface FileRoutesById {
   '/api/delete-account': typeof ApiDeleteAccountRoute
   '/api/stripe-webhook': typeof ApiStripeWebhookRoute
   '/api/plaid/create-link-token': typeof ApiPlaidCreateLinkTokenRoute
+  '/api/plaid/disconnect': typeof ApiPlaidDisconnectRoute
   '/api/plaid/exchange-token': typeof ApiPlaidExchangeTokenRoute
   '/api/plaid/institutions': typeof ApiPlaidInstitutionsRoute
   '/api/plaid/sync': typeof ApiPlaidSyncRoute
@@ -195,6 +213,7 @@ export interface FileRouteTypes {
     | '/'
     | '/categories'
     | '/dashboard'
+    | '/demo'
     | '/export'
     | '/login'
     | '/onboarding'
@@ -208,6 +227,7 @@ export interface FileRouteTypes {
     | '/api/delete-account'
     | '/api/stripe-webhook'
     | '/api/plaid/create-link-token'
+    | '/api/plaid/disconnect'
     | '/api/plaid/exchange-token'
     | '/api/plaid/institutions'
     | '/api/plaid/sync'
@@ -216,6 +236,7 @@ export interface FileRouteTypes {
     | '/'
     | '/categories'
     | '/dashboard'
+    | '/demo'
     | '/export'
     | '/login'
     | '/onboarding'
@@ -229,6 +250,7 @@ export interface FileRouteTypes {
     | '/api/delete-account'
     | '/api/stripe-webhook'
     | '/api/plaid/create-link-token'
+    | '/api/plaid/disconnect'
     | '/api/plaid/exchange-token'
     | '/api/plaid/institutions'
     | '/api/plaid/sync'
@@ -237,6 +259,7 @@ export interface FileRouteTypes {
     | '/'
     | '/categories'
     | '/dashboard'
+    | '/demo'
     | '/export'
     | '/login'
     | '/onboarding'
@@ -250,6 +273,7 @@ export interface FileRouteTypes {
     | '/api/delete-account'
     | '/api/stripe-webhook'
     | '/api/plaid/create-link-token'
+    | '/api/plaid/disconnect'
     | '/api/plaid/exchange-token'
     | '/api/plaid/institutions'
     | '/api/plaid/sync'
@@ -259,6 +283,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   CategoriesRoute: typeof CategoriesRoute
   DashboardRoute: typeof DashboardRoute
+  DemoRoute: typeof DemoRoute
   ExportRoute: typeof ExportRoute
   LoginRoute: typeof LoginRoute
   OnboardingRoute: typeof OnboardingRoute
@@ -272,6 +297,7 @@ export interface RootRouteChildren {
   ApiDeleteAccountRoute: typeof ApiDeleteAccountRoute
   ApiStripeWebhookRoute: typeof ApiStripeWebhookRoute
   ApiPlaidCreateLinkTokenRoute: typeof ApiPlaidCreateLinkTokenRoute
+  ApiPlaidDisconnectRoute: typeof ApiPlaidDisconnectRoute
   ApiPlaidExchangeTokenRoute: typeof ApiPlaidExchangeTokenRoute
   ApiPlaidInstitutionsRoute: typeof ApiPlaidInstitutionsRoute
   ApiPlaidSyncRoute: typeof ApiPlaidSyncRoute
@@ -349,6 +375,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ExportRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/demo': {
+      id: '/demo'
+      path: '/demo'
+      fullPath: '/demo'
+      preLoaderRoute: typeof DemoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/dashboard': {
       id: '/dashboard'
       path: '/dashboard'
@@ -405,6 +438,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPlaidExchangeTokenRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/plaid/disconnect': {
+      id: '/api/plaid/disconnect'
+      path: '/api/plaid/disconnect'
+      fullPath: '/api/plaid/disconnect'
+      preLoaderRoute: typeof ApiPlaidDisconnectRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/plaid/create-link-token': {
       id: '/api/plaid/create-link-token'
       path: '/api/plaid/create-link-token'
@@ -419,6 +459,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   CategoriesRoute: CategoriesRoute,
   DashboardRoute: DashboardRoute,
+  DemoRoute: DemoRoute,
   ExportRoute: ExportRoute,
   LoginRoute: LoginRoute,
   OnboardingRoute: OnboardingRoute,
@@ -432,6 +473,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiDeleteAccountRoute: ApiDeleteAccountRoute,
   ApiStripeWebhookRoute: ApiStripeWebhookRoute,
   ApiPlaidCreateLinkTokenRoute: ApiPlaidCreateLinkTokenRoute,
+  ApiPlaidDisconnectRoute: ApiPlaidDisconnectRoute,
   ApiPlaidExchangeTokenRoute: ApiPlaidExchangeTokenRoute,
   ApiPlaidInstitutionsRoute: ApiPlaidInstitutionsRoute,
   ApiPlaidSyncRoute: ApiPlaidSyncRoute,

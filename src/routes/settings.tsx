@@ -67,6 +67,20 @@ function Settings() {
   const [institutions, setInstitutions] = useState<Institution[]>([]);
   const [syncing, setSyncing] = useState(false);
   const [syncMessage, setSyncMessage] = useState<string | null>(null);
+  const [disconnectingId, setDisconnectingId] = useState<string | null>(null);
+
+  async function handleDisconnect(institutionId: string) {
+    setDisconnectingId(institutionId);
+    const res = await authedFetch("/api/plaid/disconnect", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ institution_id: institutionId }),
+    });
+    if (res.ok) {
+      setInstitutions((prev) => prev.filter((i) => i.id !== institutionId));
+    }
+    setDisconnectingId(null);
+  }
 
   const refreshInstitutions = useCallback(async () => {
     const res = await authedFetch("/api/plaid/institutions");
@@ -158,11 +172,22 @@ function Settings() {
                 <div key={inst.id} className="flex items-center justify-between rounded-lg border p-3">
                   <div className="flex items-center gap-3">
                     <Building2 className="h-4 w-4 text-primary" />
-                    <span className="text-sm font-medium">{inst.institution_name ?? "Connected bank"}</span>
+                    <div>
+                      <div className="text-sm font-medium">{inst.institution_name ?? "Connected bank"}</div>
+                      <div className="text-xs text-muted-foreground">
+                        Connected {new Date(inst.created_at).toLocaleDateString()}
+                      </div>
+                    </div>
                   </div>
-                  <span className="text-xs text-muted-foreground">
-                    Connected {new Date(inst.created_at).toLocaleDateString()}
-                  </span>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="text-muted-foreground hover:text-destructive"
+                    onClick={() => handleDisconnect(inst.id)}
+                    disabled={disconnectingId === inst.id}
+                  >
+                    {disconnectingId === inst.id ? "Disconnecting…" : "Disconnect"}
+                  </Button>
                 </div>
               ))}
               <Button variant="outline" size="sm" onClick={handleSyncNow} disabled={syncing}>
