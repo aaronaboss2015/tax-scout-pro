@@ -6,7 +6,7 @@
   "main": "@tanstack/react-start/server-entry",
   "vars": {
     "VITE_SUPABASE_URL": "https://hdrwbgpskjaextwbdtgc.supabase.co",
-    "PLAID_ENV": "sandbox",
-    "VITE_PLAID_ENV": "sandbox",
+    "PLAID_ENV": "production",
+    "VITE_PLAID_ENV": "production",
   },
 }

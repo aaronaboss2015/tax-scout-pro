@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { getAuthedUser, plaidFetch, serviceClient } from "@/lib/server";
+import { getAuthedUser, plaidFetch, serviceClient, userCanSync } from "@/lib/server";
 import { guessCategory, shouldSkipTransaction } from "@/lib/plaidCategorize";
 
 interface PlaidTransaction {
@@ -23,6 +23,9 @@ export const Route = createFileRoute("/api/plaid/sync")({
       POST: async ({ request }) => {
         const user = await getAuthedUser(request);
         if (!user) return new Response("Unauthorized", { status: 401 });
+        if (!(await userCanSync(user.id))) {
+          return Response.json({ error: "subscription_required" }, { status: 403 });
+        }
 
         const supabase = serviceClient();
 

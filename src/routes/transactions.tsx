@@ -11,11 +11,17 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Search, Filter, Plus } from "lucide-react";
-import { useTransactions, addTransaction, setTransactionStatus, CATEGORIES, type DbTransaction, type Status } from "@/lib/data";
+import { useTransactions, addTransaction, setTransactionStatus, useProfile, computeEntitlements, CATEGORIES, type DbTransaction, type Status } from "@/lib/data";
 import { ConfidenceBadge } from "./dashboard";
 import { track } from "@/lib/track";
 
 export const Route = createFileRoute("/transactions")({
+  head: () => ({
+    meta: [
+      { title: "Transactions — TaxScout" },
+      { name: "robots", content: "noindex, nofollow" },
+    ],
+  }),
   component: Transactions,
   validateSearch: z.object({ q: z.string().optional() }),
 });
@@ -25,6 +31,8 @@ const FILTERS = ["All", "Deductible", "Personal", "Needs Review"] as const;
 function Transactions() {
   const { q: initialQ } = Route.useSearch();
   const { transactions, loading, refresh } = useTransactions();
+  const { profile } = useProfile();
+  const entitlements = computeEntitlements(profile);
   const [filter, setFilter] = useState<(typeof FILTERS)[number]>("All");
   const [q, setQ] = useState(initialQ ?? "");
   const [active, setActive] = useState<DbTransaction | null>(null);
@@ -55,7 +63,7 @@ function Transactions() {
             <p className="text-sm text-muted-foreground">{transactions.length.toLocaleString()} logged</p>
           </div>
           <div className="flex gap-2">
-            <AddTransactionDialog open={addOpen} onOpenChange={setAddOpen} onAdded={refresh} />
+            <AddTransactionDialog open={addOpen} onOpenChange={setAddOpen} onAdded={refresh} disabled={!entitlements.canEdit} />
           </div>
         </div>
 
@@ -136,9 +144,12 @@ function Transactions() {
                   </div>
                 )}
                 <div className="grid grid-cols-2 gap-2">
-                  <Button variant="outline" size="sm" onClick={() => handleStatusChange(active.id, "deductible")}>Mark deductible</Button>
-                  <Button variant="outline" size="sm" onClick={() => handleStatusChange(active.id, "personal")}>Mark personal</Button>
+                  <Button variant="outline" size="sm" disabled={!entitlements.canEdit} onClick={() => handleStatusChange(active.id, "deductible")}>Mark deductible</Button>
+                  <Button variant="outline" size="sm" disabled={!entitlements.canEdit} onClick={() => handleStatusChange(active.id, "personal")}>Mark personal</Button>
                 </div>
+                {!entitlements.canEdit && (
+                  <p className="text-xs text-muted-foreground">Your trial has ended. Upgrade to keep editing transactions.</p>
+                )}
               </div>
             </>
           )}
@@ -148,7 +159,7 @@ function Transactions() {
   );
 }
 
-function AddTransactionDialog({ open, onOpenChange, onAdded }: { open: boolean; onOpenChange: (o: boolean) => void; onAdded: () => void }) {
+function AddTransactionDialog({ open, onOpenChange, onAdded, disabled }: { open: boolean; onOpenChange: (o: boolean) => void; onAdded: () => void; disabled?: boolean }) {
   const [merchant, setMerchant] = useState("");
   const [amount, setAmount] = useState("");
   const [date, setDate] = useState(() => new Date().toISOString().slice(0, 10));
@@ -183,7 +194,7 @@ function AddTransactionDialog({ open, onOpenChange, onAdded }: { open: boolean; 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogTrigger asChild>
-        <Button className="bg-primary text-primary-foreground hover:bg-primary/90"><Plus className="mr-2 h-4 w-4" /> Add transaction</Button>
+        <Button className="bg-primary text-primary-foreground hover:bg-primary/90" disabled={disabled}><Plus className="mr-2 h-4 w-4" /> Add transaction</Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>

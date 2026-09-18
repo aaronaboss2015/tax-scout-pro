@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { env } from "cloudflare:workers";
 import Stripe from "stripe";
 import { createClient } from "@supabase/supabase-js";
+import { trackServerEvent } from "@/lib/track";
 
 export const Route = createFileRoute("/api/stripe-webhook")({
   server: {
@@ -53,15 +54,48 @@ export const Route = createFileRoute("/api/stripe-webhook")({
             const subscription = event.data.object as Stripe.Subscription;
             const price = subscription.items.data[0]?.price;
             const plan = price?.recurring?.interval === "year" ? "annual" : "monthly";
+            const newStatus = subscription.status;
+
+            // Look up the profile first (not just blind-update) so we know the
+            // previous status and the user id -- both needed to log the right
+            // analytics event below.
+            const { data: existingProfile } = await supabase
+              .from("profiles")
+              .select("id, subscription_status")
+              .eq("stripe_customer_id", subscription.customer as string)
+              .maybeSingle();
 
             await supabase
               .from("profiles")
               .update({
-                subscription_status: subscription.status,
+                subscription_status: newStatus,
                 subscription_plan: plan,
                 current_period_end: new Date(subscription.items.data[0].current_period_end * 1000).toISOString(),
               })
               .eq("stripe_customer_id", subscription.customer as string);
+
+            if (existingProfile) {
+              // Fires once, at the moment Stripe reports the subscription
+              // leaving "trialing" -- whether it converted to paid or lapsed.
+              // Only fires if trial_period_days is actually configured on the
+              // Stripe Price; if the trial is enforced purely at the app
+              // layer, this event never occurs and trial tracking needs a
+              // different (scheduled) mechanism instead.
+              if (existingProfile.subscription_status === "trialing" && newStatus !== "trialing") {
+                await trackServerEvent(supabase, {
+                  userId: existingProfile.id,
+                  eventName: "trial_ended",
+                  properties: { outcome: newStatus, plan },
+                });
+              }
+              if (event.type === "customer.subscription.deleted") {
+                await trackServerEvent(supabase, {
+                  userId: existingProfile.id,
+                  eventName: "subscription_cancelled",
+                  properties: { plan, previous_status: existingProfile.subscription_status },
+                });
+              }
+            }
             break;
           }
           default:

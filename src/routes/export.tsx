@@ -4,11 +4,20 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { FileDown, FileText, Sparkles } from "lucide-react";
-import { CATEGORIES, categoryTotals, useTransactions } from "@/lib/data";
+import { CATEGORIES, categoryTotals, useTransactions, useProfile, computeEntitlements } from "@/lib/data";
 import { useAuth } from "@/lib/auth";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { UpsellCard } from "@/components/taxscout/UpsellCard";
 
-export const Route = createFileRoute("/export")({ component: Export });
+export const Route = createFileRoute("/export")({
+  head: () => ({
+    meta: [
+      { title: "Export — TaxScout" },
+      { name: "robots", content: "noindex, nofollow" },
+    ],
+  }),
+  component: Export,
+});
 
 function downloadCsv(rows: Array<Record<string, string | number>>, filename: string) {
   if (rows.length === 0) return;
@@ -30,6 +39,8 @@ function downloadCsv(rows: Array<Record<string, string | number>>, filename: str
 function Export() {
   const { user } = useAuth();
   const { transactions } = useTransactions();
+  const { profile } = useProfile();
+  const entitlements = computeEntitlements(profile);
   const name = (user?.user_metadata?.name as string | undefined) ?? user?.email?.split("@")[0] ?? "—";
   const profession = (user?.user_metadata?.profession as string | undefined) ?? "—";
   const totals = categoryTotals(transactions);
@@ -58,36 +69,45 @@ function Export() {
     <AppShell title="Export">
       <div className="mx-auto grid max-w-7xl gap-6 lg:grid-cols-[1fr_2fr]">
         <div className="space-y-4 print:hidden">
-          <Card className="p-6">
-            <h2 className="text-xl font-bold">Generate Schedule C</h2>
-            <p className="mt-1 text-sm text-muted-foreground">Summary based on your reviewed transactions.</p>
-            <div className="mt-5 space-y-4">
-              <div>
-                <Label>Tax year</Label>
-                <Select defaultValue="2026">
-                  <SelectTrigger className="mt-1.5"><SelectValue /></SelectTrigger>
-                  <SelectContent>{["2026", "2025", "2024"].map(y => <SelectItem key={y} value={y}>{y}</SelectItem>)}</SelectContent>
-                </Select>
-              </div>
-              <Button onClick={handlePrintSchedule} className="w-full bg-primary text-primary-foreground hover:bg-primary/90" size="lg">
-                <Sparkles className="mr-2 h-4 w-4" /> Generate Schedule C summary
-              </Button>
-            </div>
-          </Card>
+          {entitlements.canExport ? (
+            <>
+              <Card className="p-6">
+                <h2 className="text-xl font-bold">Generate Schedule C</h2>
+                <p className="mt-1 text-sm text-muted-foreground">Summary based on your reviewed transactions.</p>
+                <div className="mt-5 space-y-4">
+                  <div>
+                    <Label>Tax year</Label>
+                    <Select defaultValue="2026">
+                      <SelectTrigger className="mt-1.5"><SelectValue /></SelectTrigger>
+                      <SelectContent>{["2026", "2025", "2024"].map(y => <SelectItem key={y} value={y}>{y}</SelectItem>)}</SelectContent>
+                    </Select>
+                  </div>
+                  <Button onClick={handlePrintSchedule} className="w-full bg-primary text-primary-foreground hover:bg-primary/90" size="lg">
+                    <Sparkles className="mr-2 h-4 w-4" /> Generate Schedule C summary
+                  </Button>
+                </div>
+              </Card>
 
-          <Card className="p-6">
-            <h3 className="font-semibold">Download options</h3>
-            <div className="mt-4 space-y-2">
-              <Button variant="outline" className="w-full justify-start" onClick={handlePrintSchedule}><FileDown className="mr-2 h-4 w-4" /> Schedule C PDF (print to PDF)</Button>
-              <Button variant="outline" className="w-full justify-start" onClick={handleExportCsv}><FileDown className="mr-2 h-4 w-4" /> CSV (TurboTax import)</Button>
-              <Button variant="outline" className="w-full justify-start" disabled><FileDown className="mr-2 h-4 w-4" /> QuickBooks .QBO <span className="ml-auto text-xs text-muted-foreground">Coming soon</span></Button>
-            </div>
-          </Card>
+              <Card className="p-6">
+                <h3 className="font-semibold">Download options</h3>
+                <div className="mt-4 space-y-2">
+                  <Button variant="outline" className="w-full justify-start" onClick={handlePrintSchedule}><FileDown className="mr-2 h-4 w-4" /> Schedule C PDF (print to PDF)</Button>
+                  <Button variant="outline" className="w-full justify-start" onClick={handleExportCsv}><FileDown className="mr-2 h-4 w-4" /> CSV (TurboTax import)</Button>
+                  <Button variant="outline" className="w-full justify-start" disabled><FileDown className="mr-2 h-4 w-4" /> QuickBooks .QBO <span className="ml-auto text-xs text-muted-foreground">Coming soon</span></Button>
+                </div>
+              </Card>
 
-          <Card className="p-6">
-            <h3 className="font-semibold">Send to your CPA</h3>
-            <p className="mt-1 text-xs text-muted-foreground">Emailing a copy directly isn't available yet — download the PDF above and send it yourself for now.</p>
-          </Card>
+              <Card className="p-6">
+                <h3 className="font-semibold">Send to your CPA</h3>
+                <p className="mt-1 text-xs text-muted-foreground">Emailing a copy directly isn't available yet — download the PDF above and send it yourself for now.</p>
+              </Card>
+            </>
+          ) : (
+            <UpsellCard
+              feature="Schedule C export"
+              description="You can preview your Schedule C summary for free. Upgrade to download it as a PDF or CSV."
+            />
+          )}
         </div>
 
         <Card className="p-0 overflow-hidden print:border-none print:shadow-none">

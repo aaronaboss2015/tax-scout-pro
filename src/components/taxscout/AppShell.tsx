@@ -2,14 +2,16 @@ import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { useEffect } from "react";
 import {
   LayoutDashboard, Receipt, Tags, Calculator, FileDown,
-  Repeat, Settings, Sparkles, Search, ChevronDown, LogOut,
+  Repeat, Settings, Search, ChevronDown, LogOut,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { Logo } from "@/components/taxscout/Logo";
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useAuth } from "@/lib/auth";
 import { supabase } from "@/lib/supabase";
+import { useProfile, computeEntitlements } from "@/lib/data";
 
 const NAV = [
   { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -25,6 +27,8 @@ export function AppShell({ children, title }: { children: React.ReactNode; title
   const path = useRouterState({ select: (s) => s.location.pathname });
   const nav = useNavigate();
   const { user, loading } = useAuth();
+  const { profile } = useProfile();
+  const entitlements = computeEntitlements(profile);
 
   useEffect(() => {
     if (!loading && !user) {
@@ -59,7 +63,7 @@ export function AppShell({ children, title }: { children: React.ReactNode; title
       {/* Sidebar */}
       <aside className="hidden w-60 flex-shrink-0 flex-col border-r bg-sidebar md:flex">
         <Link to="/dashboard" className="flex h-16 items-center gap-2 border-b px-5">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground"><Sparkles className="h-4 w-4" /></div>
+          <Logo />
           <span className="font-bold">TaxScout</span>
         </Link>
         <nav className="flex-1 space-y-0.5 p-3">
@@ -118,6 +122,18 @@ export function AppShell({ children, title }: { children: React.ReactNode; title
             </div>
           </div>
         </header>
+        {entitlements.trialExpired && (
+          <div className="flex flex-wrap items-center justify-between gap-2 border-b bg-warning/10 px-6 py-2.5 text-sm">
+            <span>Your free trial has ended. Your data is still here, but adding, syncing, or editing is paused until you upgrade.</span>
+            <Link to="/settings" hash="billing" className="font-medium text-primary hover:underline">View plans</Link>
+          </div>
+        )}
+        {entitlements.inTrial && entitlements.trialDaysLeft <= 5 && (
+          <div className="flex flex-wrap items-center justify-between gap-2 border-b bg-muted/50 px-6 py-2 text-xs text-muted-foreground">
+            <span>{entitlements.trialDaysLeft} day{entitlements.trialDaysLeft === 1 ? "" : "s"} left in your free trial.</span>
+            <Link to="/settings" hash="billing" className="font-medium text-primary hover:underline">View plans</Link>
+          </div>
+        )}
         <main className="flex-1 p-6 pb-24 md:pb-6">{children}</main>
 
         {/* Mobile bottom nav */}

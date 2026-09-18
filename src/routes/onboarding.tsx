@@ -1,6 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
-import { Sparkles, Building2, Wallet } from "lucide-react";
+import { Building2, Wallet } from "lucide-react";
+import { Logo } from "@/components/taxscout/Logo";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -12,8 +13,17 @@ import {
 import { supabase } from "@/lib/supabase";
 import { ConnectBankButton } from "@/components/taxscout/ConnectBankButton";
 import { track } from "@/lib/track";
+import { useProfile, computeEntitlements } from "@/lib/data";
 
-export const Route = createFileRoute("/onboarding")({ component: Onboarding });
+export const Route = createFileRoute("/onboarding")({
+  head: () => ({
+    meta: [
+      { title: "Get Started — TaxScout" },
+      { name: "robots", content: "noindex, nofollow" },
+    ],
+  }),
+  component: Onboarding,
+});
 
 const INCOME_RANGES = [
   { label: "$0 – $25K", estimate: 12500 },
@@ -52,7 +62,7 @@ function Onboarding() {
     <div className="min-h-screen bg-gradient-to-br from-primary-soft via-background to-background p-6">
       <div className="mx-auto max-w-2xl pt-10">
         <div className="mb-8 flex items-center gap-2">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground"><Sparkles className="h-4 w-4" /></div>
+          <Logo />
           <span className="font-bold">TaxScout</span>
         </div>
         <div className="mb-2 flex justify-between text-xs text-muted-foreground">
@@ -119,6 +129,8 @@ function Step2({ pick, onPickChange }: { pick: number; onPickChange: (i: number)
 
 function Step3() {
   const [connected, setConnected] = useState(false);
+  const { profile } = useProfile();
+  const entitlements = computeEntitlements(profile);
   return (
     <>
       <h2 className="text-2xl font-bold">Connect your accounts</h2>
@@ -130,7 +142,7 @@ function Step3() {
             <div className="font-semibold">Bank connected — importing your transactions.</div>
           </div>
         ) : (
-          <ConnectBankButton onConnected={() => setConnected(true)} />
+          <ConnectBankButton onConnected={() => setConnected(true)} canSync={entitlements.canSync} />
         )}
       </div>
     </>

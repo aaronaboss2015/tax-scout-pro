@@ -9,15 +9,25 @@ import {
 } from "recharts";
 import { TrendingUp, DollarSign, CheckCircle2, Activity, Check, X } from "lucide-react";
 import { useAuth } from "@/lib/auth";
-import { useTransactions, categoryTotals, monthlyTrend, computeKPI, reviewQueue, setTransactionStatus, type Status } from "@/lib/data";
+import { useTransactions, categoryTotals, monthlyTrend, computeKPI, reviewQueue, setTransactionStatus, useProfile, computeEntitlements, type Status } from "@/lib/data";
 
-export const Route = createFileRoute("/dashboard")({ component: Dashboard });
+export const Route = createFileRoute("/dashboard")({
+  head: () => ({
+    meta: [
+      { title: "Dashboard — TaxScout" },
+      { name: "robots", content: "noindex, nofollow" },
+    ],
+  }),
+  component: Dashboard,
+});
 
 const COLORS = ["#059669", "#10b981", "#34d399", "#6ee7b7", "#a7f3d0", "#0d9488", "#0891b2", "#0284c7", "#6366f1", "#8b5cf6"];
 
 function Dashboard() {
   const { user } = useAuth();
   const { transactions, loading, refresh } = useTransactions();
+  const { profile } = useProfile();
+  const entitlements = computeEntitlements(profile);
 
   const firstName = (user?.user_metadata?.name as string | undefined)?.split(" ")[0] ?? user?.email?.split("@")[0] ?? "there";
 
@@ -45,7 +55,7 @@ function Dashboard() {
       <div className="mx-auto max-w-7xl space-y-6">
         <div className="flex flex-wrap items-end justify-between gap-3">
           <div>
-            <h2 className="text-2xl font-bold">Welcome back, {firstName} 👋</h2>
+            <h2 className="text-2xl font-bold">Welcome back, {firstName}</h2>
             <p className="text-sm text-muted-foreground">Here's how your {new Date().getFullYear()} tax year is shaping up.</p>
           </div>
           <Button className="bg-primary text-primary-foreground hover:bg-primary/90">Generate Schedule C</Button>
@@ -101,7 +111,11 @@ function Dashboard() {
                 </AreaChart>
               </ResponsiveContainer>
             ) : (
-              <div className="flex h-[260px] items-center justify-center text-sm text-muted-foreground">No data yet</div>
+              <div className="flex h-[260px] flex-col items-center justify-center gap-2 text-center">
+                <TrendingUp className="h-6 w-6 text-muted-foreground/50" />
+                <div className="text-sm text-muted-foreground">No deductions logged yet</div>
+                <Link to="/settings" className="text-xs font-medium text-primary hover:underline">Connect a bank account</Link>
+              </div>
             )}
           </Card>
 
@@ -134,7 +148,11 @@ function Dashboard() {
                 </div>
               </>
             ) : (
-              <div className="flex h-[180px] items-center justify-center text-sm text-muted-foreground">No data yet</div>
+              <div className="flex h-[180px] flex-col items-center justify-center gap-2 text-center">
+                <Activity className="h-6 w-6 text-muted-foreground/50" />
+                <div className="text-sm text-muted-foreground">No categories yet</div>
+                <Link to="/transactions" className="text-xs font-medium text-primary hover:underline">Review transactions</Link>
+              </div>
             )}
           </Card>
         </div>
@@ -162,8 +180,8 @@ function Dashboard() {
                   </div>
                   <div className="ml-4 flex items-center gap-2">
                     <span className="font-semibold tabular-nums">${t.amount.toFixed(2)}</span>
-                    <Button size="icon" variant="outline" className="h-8 w-8 text-primary" aria-label="Mark deductible" onClick={() => handleReviewAction(t.id, "deductible")}><Check className="h-4 w-4" /></Button>
-                    <Button size="icon" variant="outline" className="h-8 w-8 text-muted-foreground" aria-label="Mark personal" onClick={() => handleReviewAction(t.id, "personal")}><X className="h-4 w-4" /></Button>
+                    <Button size="icon" variant="outline" className="h-8 w-8 text-primary" aria-label="Mark deductible" disabled={!entitlements.canEdit} onClick={() => handleReviewAction(t.id, "deductible")}><Check className="h-4 w-4" /></Button>
+                    <Button size="icon" variant="outline" className="h-8 w-8 text-muted-foreground" aria-label="Mark personal" disabled={!entitlements.canEdit} onClick={() => handleReviewAction(t.id, "personal")}><X className="h-4 w-4" /></Button>
                   </div>
                 </div>
               ))}

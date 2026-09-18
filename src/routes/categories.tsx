@@ -4,7 +4,15 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { CATEGORIES, categoryTotals, useTransactions } from "@/lib/data";
 
-export const Route = createFileRoute("/categories")({ component: Categories });
+export const Route = createFileRoute("/categories")({
+  head: () => ({
+    meta: [
+      { title: "Categories — TaxScout" },
+      { name: "robots", content: "noindex, nofollow" },
+    ],
+  }),
+  component: Categories,
+});
 
 function Categories() {
   const { transactions } = useTransactions();

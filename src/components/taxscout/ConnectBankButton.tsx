@@ -1,21 +1,23 @@
 import { useCallback, useEffect, useState } from "react";
 import { usePlaidLink } from "react-plaid-link";
+import { Link } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
-import { Building2 } from "lucide-react";
+import { Building2, Lock } from "lucide-react";
 import { authedFetch } from "@/lib/supabase";
 import { track } from "@/lib/track";
 
-export function ConnectBankButton({ onConnected }: { onConnected: () => void }) {
+export function ConnectBankButton({ onConnected, canSync }: { onConnected: () => void; canSync: boolean }) {
   const [linkToken, setLinkToken] = useState<string | null>(null);
   const [status, setStatus] = useState<"idle" | "loading" | "syncing" | "error">("idle");
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    if (!canSync) return;
     authedFetch("/api/plaid/create-link-token", { method: "POST" })
       .then((r) => r.json())
       .then((data: { link_token?: string }) => setLinkToken(data.link_token ?? null))
       .catch(() => setError("Couldn't reach bank connection service."));
-  }, []);
+  }, [canSync]);
 
   const onSuccess = useCallback(
     async (publicToken: string | null, metadata: { institution: { name: string } | null }) => {
@@ -52,6 +54,21 @@ export function ConnectBankButton({ onConnected }: { onConnected: () => void }) 
 
   const busy = status === "loading" || status === "syncing";
   const isSandbox = import.meta.env.VITE_PLAID_ENV !== "production";
+
+  if (!canSync) {
+    return (
+      <div className="rounded-lg border border-dashed p-4 text-center">
+        <Lock className="mx-auto h-4 w-4 text-muted-foreground" />
+        <p className="mt-2 text-sm font-medium">Bank sync is a paid feature</p>
+        <p className="mt-1 text-xs text-muted-foreground">
+          Upgrade to connect your accounts and automatically import transactions.
+        </p>
+        <Link to="/settings" hash="billing" className="mt-3 inline-block">
+          <Button size="sm">View plans</Button>
+        </Link>
+      </div>
+    );
+  }
 
   return (
     <div>

@@ -1,6 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect } from "react";
-import { Sparkles, ArrowRight } from "lucide-react";
+import { ArrowRight } from "lucide-react";
+import { Logo } from "@/components/taxscout/Logo";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -12,7 +13,9 @@ export const Route = createFileRoute("/demo")({
     meta: [
       { title: "See TaxScout in action — Demo" },
       { name: "description", content: "A sample-data preview of how TaxScout categorizes transactions and flags potential deductions. No signup required." },
+      { property: "og:url", content: "https://taxscout.dev/demo" },
     ],
+    links: [{ rel: "canonical", href: "https://taxscout.dev/demo" }],
   }),
   component: Demo,
 });
@@ -30,7 +33,7 @@ function Demo() {
       <header className="border-b bg-background px-6 py-4">
         <div className="mx-auto flex max-w-5xl items-center justify-between">
           <Link to="/" className="flex items-center gap-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground"><Sparkles className="h-4 w-4" /></div>
+            <Logo />
             <span className="font-bold">TaxScout</span>
           </Link>
           <Link to="/signup" onClick={() => track("demo_signup_clicked")}>

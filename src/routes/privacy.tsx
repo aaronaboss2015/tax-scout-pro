@@ -1,12 +1,15 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Sparkles, ShieldCheck, Eye, KeyRound, Trash2, Clock } from "lucide-react";
+import { ShieldCheck, Eye, KeyRound, Trash2, Clock } from "lucide-react";
+import { Logo } from "@/components/taxscout/Logo";
 
 export const Route = createFileRoute("/privacy")({
   head: () => ({
     meta: [
       { title: "Privacy & Security — TaxScout" },
       { name: "description", content: "What TaxScout can and can't access, how bank connections work, and how to delete your data." },
+      { property: "og:url", content: "https://taxscout.dev/privacy" },
     ],
+    links: [{ rel: "canonical", href: "https://taxscout.dev/privacy" }],
   }),
   component: Privacy,
 });
@@ -15,7 +18,7 @@ function Privacy() {
   return (
     <div className="mx-auto max-w-2xl px-6 py-16">
       <Link to="/" className="mb-10 flex items-center gap-2">
-        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground"><Sparkles className="h-4 w-4" /></div>
+        <Logo />
         <span className="font-bold">TaxScout</span>
       </Link>
       <h1 className="text-3xl font-bold tracking-tight">Privacy & Security</h1>

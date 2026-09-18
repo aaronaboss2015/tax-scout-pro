@@ -9,7 +9,9 @@ export const Route = createFileRoute("/signup")({
     meta: [
       { title: "Start free trial — TaxScout" },
       { name: "description", content: "Start your 14-day TaxScout trial. No credit card required." },
+      { property: "og:url", content: "https://taxscout.dev/signup" },
     ],
+    links: [{ rel: "canonical", href: "https://taxscout.dev/signup" }],
   }),
   component: Signup,
 });

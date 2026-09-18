@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { Sparkles } from "lucide-react";
+import { Logo } from "@/components/taxscout/Logo";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,7 +12,9 @@ export const Route = createFileRoute("/login")({
     meta: [
       { title: "Sign in — TaxScout" },
       { name: "description", content: "Sign in to your TaxScout account." },
+      { property: "og:url", content: "https://taxscout.dev/login" },
     ],
+    links: [{ rel: "canonical", href: "https://taxscout.dev/login" }],
   }),
   component: Login,
 });
@@ -85,7 +87,7 @@ export function AuthShell({
     <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-primary-soft via-background to-background p-6">
       <Card className="w-full max-w-md p-8">
         <Link to="/" className="mb-6 flex items-center gap-2">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground"><Sparkles className="h-4 w-4" /></div>
+          <Logo />
           <span className="font-bold">TaxScout</span>
         </Link>
         <h1 className="text-2xl font-bold">{title}</h1>

@@ -7,19 +7,29 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
-import { CreditCard, Trash2, Building2, RefreshCw } from "lucide-react";
+import { CreditCard, Trash2, Building2, RefreshCw, Sun, Moon, Monitor } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { supabase, authedFetch } from "@/lib/supabase";
-import { useProfile, buildCheckoutUrl } from "@/lib/data";
+import { useProfile, buildCheckoutUrl, computeEntitlements } from "@/lib/data";
 import { STATE_CODES, STATE_TAX_RATES } from "@/lib/stateTax";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ConnectBankButton } from "@/components/taxscout/ConnectBankButton";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { getStoredTheme, setTheme, type Theme } from "@/lib/theme";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 
-export const Route = createFileRoute("/settings")({ component: Settings });
+export const Route = createFileRoute("/settings")({
+  head: () => ({
+    meta: [
+      { title: "Settings — TaxScout" },
+      { name: "robots", content: "noindex, nofollow" },
+    ],
+  }),
+  component: Settings,
+});
 
 interface Institution {
   id: string;
@@ -31,11 +41,24 @@ function Settings() {
   const { user } = useAuth();
   const nav = useNavigate();
   const { profile, loading: profileLoading, refresh: refreshProfile } = useProfile();
+  const entitlements = computeEntitlements(profile);
   const [taxState, setTaxState] = useState("");
   const [taxStateSeeded, setTaxStateSeeded] = useState(false);
   const [savingTaxProfile, setSavingTaxProfile] = useState(false);
   const [taxProfileSaved, setTaxProfileSaved] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [theme, setThemeState] = useState<Theme>("system");
+
+  useEffect(() => {
+    setThemeState(getStoredTheme());
+  }, []);
+
+  function handleThemeChange(value: string) {
+    if (!value) return;
+    const next = value as Theme;
+    setThemeState(next);
+    setTheme(next);
+  }
 
   useEffect(() => {
     if (!profileLoading && !taxStateSeeded) {
@@ -190,19 +213,21 @@ function Settings() {
                   </Button>
                 </div>
               ))}
-              <Button variant="outline" size="sm" onClick={handleSyncNow} disabled={syncing}>
-                <RefreshCw className={`mr-1.5 h-3.5 w-3.5 ${syncing ? "animate-spin" : ""}`} />
-                {syncing ? "Syncing…" : "Sync now"}
-              </Button>
+              {entitlements.canSync && (
+                <Button variant="outline" size="sm" onClick={handleSyncNow} disabled={syncing}>
+                  <RefreshCw className={`mr-1.5 h-3.5 w-3.5 ${syncing ? "animate-spin" : ""}`} />
+                  {syncing ? "Syncing…" : "Sync now"}
+                </Button>
+              )}
               {syncMessage && <p className="text-xs text-muted-foreground">{syncMessage}</p>}
             </div>
           )}
           <div className="mt-4">
-            <ConnectBankButton onConnected={refreshInstitutions} />
+            <ConnectBankButton onConnected={refreshInstitutions} canSync={entitlements.canSync} />
           </div>
         </Card>
 
-        <Card className="p-6">
+        <Card id="billing" className="p-6">
           <h3 className="font-semibold">Billing</h3>
           {profileLoading ? (
             <div className="mt-4 text-sm text-muted-foreground">Loading…</div>
@@ -241,6 +266,27 @@ function Settings() {
               )}
             </>
           )}
+        </Card>
+
+        <Card className="p-6">
+          <h3 className="font-semibold">Appearance</h3>
+          <p className="mt-1 text-xs text-muted-foreground">Choose how TaxScout looks on this device.</p>
+          <ToggleGroup
+            type="single"
+            value={theme}
+            onValueChange={handleThemeChange}
+            className="mt-4 w-fit rounded-md border p-1"
+          >
+            <ToggleGroupItem value="light" aria-label="Light" className="gap-1.5 px-3">
+              <Sun className="h-4 w-4" /> Light
+            </ToggleGroupItem>
+            <ToggleGroupItem value="dark" aria-label="Dark" className="gap-1.5 px-3">
+              <Moon className="h-4 w-4" /> Dark
+            </ToggleGroupItem>
+            <ToggleGroupItem value="system" aria-label="System" className="gap-1.5 px-3">
+              <Monitor className="h-4 w-4" /> System
+            </ToggleGroupItem>
+          </ToggleGroup>
         </Card>
 
         <Card className="p-6">

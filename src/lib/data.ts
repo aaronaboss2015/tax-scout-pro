@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
+import { TRIAL_DAYS } from "@/lib/constants";
 
 export type Status = "deductible" | "personal" | "review";
 
@@ -145,6 +146,39 @@ export interface DbProfile {
   subscription_status: string | null;
   subscription_plan: string | null;
   current_period_end: string | null;
+  created_at: string;
+}
+
+export interface Entitlements {
+  isPaid: boolean;
+  trialDaysLeft: number;
+  inTrial: boolean;
+  trialExpired: boolean;
+  /** Bank sync works during the trial (matches the "14-day free trial, read-only access" promise) and on a paid plan. Quarterly estimator and Schedule C export stay paid-only per the pricing page. */
+  canSync: boolean;
+  canUseQuarterly: boolean;
+  canExport: boolean;
+  /** Adding/categorizing transactions works during the trial or on a paid plan. */
+  canEdit: boolean;
+}
+
+export function computeEntitlements(profile: DbProfile | null | undefined): Entitlements {
+  const isPaid = profile?.subscription_status === "active";
+  const createdAt = profile?.created_at ? new Date(profile.created_at).getTime() : null;
+  const daysSinceSignup = createdAt ? (Date.now() - createdAt) / 86_400_000 : 0;
+  const trialDaysLeft = Math.max(0, Math.ceil(TRIAL_DAYS - daysSinceSignup));
+  const inTrial = !isPaid && trialDaysLeft > 0;
+  const trialExpired = !isPaid && !inTrial;
+  return {
+    isPaid,
+    trialDaysLeft,
+    inTrial,
+    trialExpired,
+    canSync: isPaid || inTrial,
+    canUseQuarterly: isPaid,
+    canExport: isPaid,
+    canEdit: isPaid || inTrial,
+  };
 }
 
 export function useProfile() {

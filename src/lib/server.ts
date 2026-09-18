@@ -1,5 +1,6 @@
 import { env } from "cloudflare:workers";
 import { createClient } from "@supabase/supabase-js";
+import { TRIAL_DAYS } from "@/lib/constants";
 
 export function serviceClient() {
   return createClient(env.VITE_SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY);
@@ -15,6 +16,31 @@ export async function getAuthedUser(request: Request) {
   const { data, error } = await supabase.auth.getUser(token);
   if (error || !data.user) return null;
   return data.user;
+}
+
+/**
+ * Bank sync (Plaid) is available during the 14-day free trial (matches the
+ * "no credit card, read-only access" homepage promise) and to paid
+ * subscribers. It costs money per connected account in Production, so this
+ * is enforced server-side, not just hidden in the UI -- mirrors the
+ * client-side computeEntitlements().canSync logic in data.ts.
+ */
+export async function userCanSync(userId: string): Promise<boolean> {
+  const supabase = serviceClient();
+  const { data } = await supabase
+    .from("profiles")
+    .select("subscription_status, created_at")
+    .eq("id", userId)
+    .single();
+
+  if (data?.subscription_status === "active") return true;
+
+  if (data?.created_at) {
+    const trialEndsAt = new Date(data.created_at).getTime() + TRIAL_DAYS * 24 * 60 * 60 * 1000;
+    if (Date.now() < trialEndsAt) return true;
+  }
+
+  return false;
 }
 
 const PLAID_BASE_URLS: Record<string, string> = {

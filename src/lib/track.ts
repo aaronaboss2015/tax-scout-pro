@@ -1,3 +1,4 @@
+import type { SupabaseClient } from "@supabase/supabase-js";
 import { supabase } from "@/lib/supabase";
 
 function getSessionId(): string {
@@ -37,5 +38,28 @@ export function track(eventName: string, properties?: Record<string, unknown>) {
     );
   } catch {
     // Never let tracking break the app.
+  }
+}
+
+/**
+ * Server-side variant for events with no browser session -- e.g. the Stripe
+ * webhook, where trial/cancellation state changes happen. Takes an
+ * already-authenticated (service role) Supabase client and writes directly;
+ * there's no localStorage session id server-side, so these rows are tagged
+ * with a fixed "server" session_id instead.
+ */
+export async function trackServerEvent(
+  supabase: SupabaseClient,
+  params: { userId: string; eventName: string; properties?: Record<string, unknown> },
+) {
+  try {
+    await supabase.from("analytics_events").insert({
+      session_id: "server",
+      user_id: params.userId,
+      event_name: params.eventName,
+      properties: params.properties ?? null,
+    });
+  } catch {
+    // Never let tracking break the webhook.
   }
 }

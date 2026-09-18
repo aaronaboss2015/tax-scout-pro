@@ -1,12 +1,14 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Sparkles } from "lucide-react";
+import { Logo } from "@/components/taxscout/Logo";
 
 export const Route = createFileRoute("/terms")({
   head: () => ({
     meta: [
       { title: "Terms — TaxScout" },
       { name: "description", content: "TaxScout's terms of service: billing, cancellation, and what the product is and isn't." },
+      { property: "og:url", content: "https://taxscout.dev/terms" },
     ],
+    links: [{ rel: "canonical", href: "https://taxscout.dev/terms" }],
   }),
   component: Terms,
 });
@@ -15,7 +17,7 @@ function Terms() {
   return (
     <div className="mx-auto max-w-2xl px-6 py-16">
       <Link to="/" className="mb-10 flex items-center gap-2">
-        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground"><Sparkles className="h-4 w-4" /></div>
+        <Logo />
         <span className="font-bold">TaxScout</span>
       </Link>
       <h1 className="text-3xl font-bold tracking-tight">Terms</h1>

@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { getAuthedUser, plaidFetch, PlaidError, serviceClient } from "@/lib/server";
+import { getAuthedUser, plaidFetch, PlaidError, serviceClient, userCanSync } from "@/lib/server";
 
 export const Route = createFileRoute("/api/plaid/exchange-token")({
   server: {
@@ -7,6 +7,9 @@ export const Route = createFileRoute("/api/plaid/exchange-token")({
       POST: async ({ request }) => {
         const user = await getAuthedUser(request);
         if (!user) return new Response("Unauthorized", { status: 401 });
+        if (!(await userCanSync(user.id))) {
+          return Response.json({ error: "subscription_required" }, { status: 403 });
+        }
 
         const body = (await request.json()) as { public_token: string; institution_name?: string };
         if (!body.public_token) return new Response("Missing public_token", { status: 400 });

@@ -1,12 +1,12 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import {
-  Sparkles,
   ShieldCheck,
   Wallet,
   Receipt,
   Plug,
   Brain,
+  ListChecks,
   FileDown,
   Home,
   Car,
@@ -17,11 +17,11 @@ import {
   ArrowRight,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Logo } from "@/components/taxscout/Logo";
 import { useAuth } from "@/lib/auth";
 import { buildCheckoutUrl } from "@/lib/data";
 import { track } from "@/lib/track";
 import { Card } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import {
   Accordion,
@@ -31,6 +31,14 @@ import {
 } from "@/components/ui/accordion";
 
 export const Route = createFileRoute("/")({
+  head: () => ({
+    meta: [
+      { title: "TaxScout — Deduction Tracking for Freelancers, Explained" },
+      { name: "description", content: "TaxScout reviews your bank activity, flags what looks deductible with the reasoning shown, and exports a Schedule C-ready summary — nothing approved without you." },
+      { property: "og:url", content: "https://taxscout.dev/" },
+    ],
+    links: [{ rel: "canonical", href: "https://taxscout.dev/" }],
+  }),
   component: Landing,
 });
 
@@ -46,7 +54,6 @@ function Landing() {
       <TrustBar />
       <HowItWorks />
       <WhatWeFind />
-      <Calculator />
       <Pricing />
       <WhyTaxScout />
       <FAQ />
@@ -66,6 +73,7 @@ function Nav() {
         <nav className="hidden items-center gap-8 text-sm font-medium text-muted-foreground md:flex">
           <a href="#how" className="hover:text-foreground">How it works</a>
           <a href="#find" className="hover:text-foreground">What we find</a>
+          <Link to="/quarterly-tax-calculator" className="hover:text-foreground">Calculator</Link>
           <a href="#pricing" className="hover:text-foreground">Pricing</a>
           <a href="#faq" className="hover:text-foreground">FAQ</a>
         </nav>
@@ -82,14 +90,6 @@ function Nav() {
   );
 }
 
-function Logo() {
-  return (
-    <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground shadow-sm">
-      <Sparkles className="h-4 w-4" />
-    </div>
-  );
-}
-
 function Hero() {
   return (
     <section className="relative overflow-hidden">
@@ -97,13 +97,13 @@ function Hero() {
       <div className="mx-auto grid max-w-7xl gap-12 px-6 py-20 md:py-28 lg:grid-cols-2 lg:items-center">
         <div>
           <Badge variant="secondary" className="mb-5 rounded-full bg-accent text-accent-foreground">
-            <Sparkles className="mr-1 h-3 w-3" /> Built for 1099 freelancers
+            <Check className="mr-1 h-3 w-3" /> Built for 1099 freelancers
           </Badge>
-          <h1 className="text-4xl font-bold leading-tight tracking-tight md:text-6xl">
-            Stop overpaying the <span className="text-primary">IRS</span> by $5,000+ every year.
+          <h1 className="text-4xl font-bold leading-tight tracking-tight md:text-5xl">
+            See exactly why every <span className="text-primary">deduction</span> is a deduction.
           </h1>
           <p className="mt-5 max-w-xl text-lg text-muted-foreground">
-            The average freelancer overpays the IRS by $5,000–$10,000 every year. TaxScout connects to your accounts, finds every deductible expense automatically, and exports a Schedule C-ready summary in one click.
+            TaxScout reviews your bank activity, flags what looks deductible with the reasoning shown, and exports a Schedule C-ready summary — nothing approved without you.
           </p>
           <div className="mt-8 flex flex-wrap items-center gap-3">
             <Link to="/signup">
@@ -140,7 +140,7 @@ function HeroMockup() {
       <Card className="overflow-hidden rounded-2xl border-border/60 p-0 shadow-2xl shadow-primary/10">
         <div className="flex items-center justify-between border-b bg-muted/40 px-5 py-3">
           <div className="flex items-center gap-2 text-sm font-semibold">
-            <Brain className="h-4 w-4 text-primary" /> AI categorizing transactions…
+            <ListChecks className="h-4 w-4 text-primary" /> Matching transactions to Schedule C…
           </div>
           <div className="flex gap-1.5">
             <span className="h-2 w-2 rounded-full bg-muted-foreground/30" />
@@ -211,7 +211,7 @@ function HowItWorks() {
   ];
   return (
     <section id="how" className="mx-auto max-w-7xl px-6 py-24">
-      <SectionHeader eyebrow="How it works" title="From bank statement to tax-ready summary, with you in control." />
+      <SectionHeader title="From bank statement to tax-ready summary, with you in control." />
       <div className="mt-14 space-y-0">
         {steps.map((s, i) => (
           <div key={s.t} className="flex gap-6 border-t py-8 first:border-t-0 md:gap-10">
@@ -242,79 +242,32 @@ function WhatWeFind() {
   return (
     <section id="find" className="bg-muted/30 py-24">
       <div className="mx-auto max-w-7xl px-6">
-        <SectionHeader eyebrow="What we find" title="The deductions you're leaving on the table." />
+        <SectionHeader title="The deductions you're leaving on the table." />
         <div className="mt-12 grid gap-5 md:grid-cols-2">
-          <Card className="p-7 md:row-span-3 md:flex md:flex-col md:justify-center">
+          <Card className="overflow-hidden border-border/60 bg-gradient-to-br from-primary-soft via-background to-background p-7 md:flex md:flex-col md:justify-center">
             <div>
-              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary-soft text-primary">
+              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary text-primary-foreground">
                 {items[0].i}
               </div>
               <h3 className="mt-5 text-xl font-semibold">{items[0].t}</h3>
               <p className="mt-2 max-w-xs text-sm text-muted-foreground">{items[0].d}</p>
             </div>
           </Card>
-          {items.slice(1).map((x) => (
-            <Card key={x.t} className="p-6">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary-soft text-primary">
-                {x.i}
+          <div className="divide-y divide-border/60 rounded-2xl border border-border/60 bg-background">
+            {items.slice(1).map((x) => (
+              <div key={x.t} className="flex items-start gap-4 p-6">
+                <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-primary-soft text-primary">
+                  {x.i}
+                </div>
+                <div>
+                  <h3 className="font-semibold">{x.t}</h3>
+                  <p className="mt-1 text-sm text-muted-foreground">{x.d}</p>
+                </div>
               </div>
-              <h3 className="mt-4 font-semibold">{x.t}</h3>
-              <p className="mt-1.5 text-sm text-muted-foreground">{x.d}</p>
-            </Card>
-          ))}
+            ))}
+          </div>
         </div>
       </div>
-    </section>
-  );
-}
-
-function Calculator() {
-  const [income, setIncome] = useState(87000);
-  const found = Math.round(income * 0.12);
-  const saved = Math.round(found * 0.25);
-  return (
-    <section className="mx-auto max-w-7xl px-6 py-24">
-      <Card className="overflow-hidden border-border/60 bg-gradient-to-br from-primary-soft via-background to-background p-8 md:p-12">
-        <div className="grid gap-10 md:grid-cols-2 md:items-center">
-          <div>
-            <SectionHeader eyebrow="Savings calculator" title="See how much you could save." align="left" />
-            <label className="mt-6 block text-sm font-medium text-muted-foreground">Annual freelance income</label>
-            <div className="mt-2 flex items-center gap-3">
-              <span className="text-2xl font-semibold text-muted-foreground">$</span>
-              <Input
-                type="number"
-                value={income}
-                onChange={(e) => setIncome(Number(e.target.value) || 0)}
-                className="h-14 max-w-[220px] text-2xl font-semibold"
-              />
-            </div>
-            <input
-              type="range"
-              min={10000}
-              max={300000}
-              step={1000}
-              value={income}
-              onChange={(e) => setIncome(Number(e.target.value))}
-              className="mt-5 w-full accent-[var(--primary)]"
-            />
-          </div>
-          <div className="space-y-4">
-            <div className="rounded-xl bg-background p-5 shadow-sm">
-              <div className="text-sm text-muted-foreground">Estimated deductions found</div>
-              <div className="mt-1 text-3xl font-bold text-primary">${found.toLocaleString()}</div>
-            </div>
-            <div className="rounded-xl bg-background p-5 shadow-sm">
-              <div className="text-sm text-muted-foreground">Estimated tax saved</div>
-              <div className="mt-1 text-3xl font-bold">${saved.toLocaleString()}</div>
-            </div>
-            <Link to="/signup">
-              <Button size="lg" className="w-full bg-primary text-primary-foreground hover:bg-primary/90">
-                Find my deductions <ArrowRight className="ml-1 h-4 w-4" />
-              </Button>
-            </Link>
-          </div>
-        </div>
-      </Card>
     </section>
   );
 }
@@ -328,13 +281,13 @@ function Pricing() {
   }
 
   const tiers = [
-    { name: "Free trial", price: "$0", per: "for 14 days", desc: "Full access. No card required.", cta: "Start trial", features: ["Unlimited transactions", "Automatic categorization", "Schedule C preview"], href: "/signup" as const },
-    { name: "Monthly", price: "$19", per: "/ month", desc: "Cancel anytime.", cta: user ? "Choose monthly" : "Sign up to subscribe", features: ["Everything in trial", "Quarterly tax estimator", "Schedule C export", "Bank sync via Plaid"], href: checkoutHref("monthly") },
+    { name: "Free trial", price: "$0", per: "for 14 days", desc: "Full access. No card required.", cta: "Start trial", features: ["Bank sync via Plaid", "Unlimited transactions", "Automatic categorization", "Schedule C preview"], href: "/signup" as const },
+    { name: "Monthly", price: "$19", per: "/ month", desc: "Cancel anytime.", cta: user ? "Choose monthly" : "Sign up to subscribe", features: ["Everything in trial", "Quarterly tax estimator", "Schedule C export"], href: checkoutHref("monthly") },
     { name: "Annual", price: "$99", per: "/ year", desc: "Save $129 vs monthly.", cta: user ? "Choose annual" : "Sign up to subscribe", features: ["Everything in monthly", "2 months free vs. monthly", "Same features, lower price"], featured: true, href: checkoutHref("annual") },
   ];
   return (
     <section id="pricing" className="mx-auto max-w-7xl px-6 py-24">
-      <SectionHeader eyebrow="Pricing" title="Pays for itself 50× over." />
+      <SectionHeader title="Pays for itself 50× over." />
       <div className="mt-12 grid gap-6 md:grid-cols-3">
         {tiers.map((t) => (
           <Card
@@ -375,6 +328,12 @@ function Pricing() {
           </Card>
         ))}
       </div>
+      <p className="mt-6 text-center text-sm text-muted-foreground">
+        Weighing this against a full-service option?{" "}
+        <Link to="/taxscout-vs-keeper-tax" className="text-primary underline underline-offset-2">
+          See TaxScout vs. Keeper Tax
+        </Link>
+      </p>
     </section>
   );
 }
@@ -389,7 +348,7 @@ function WhyTaxScout() {
     <section className="py-24">
       <div className="mx-auto max-w-7xl px-6">
         <div className="grid gap-12 lg:grid-cols-[0.8fr_1.2fr] lg:items-start">
-          <SectionHeader eyebrow="Why TaxScout" title="Built for one person: you." align="left" />
+          <SectionHeader title="Built for one person: you." align="left" />
           <div className="grid gap-8 sm:grid-cols-2">
             {points.map((p) => (
               <div key={p.t} className="border-l-2 border-primary/30 pl-5">
@@ -411,13 +370,24 @@ function FAQ() {
     ["Can I cancel anytime?", "Yes. Cancel from Settings in one click. Your data stays accessible for 30 days after cancellation."],
     ["Do you support state taxes?", "Yes — the quarterly estimator lets you select your state and applies an approximate rate. It's a planning estimate, not a substitute for real tax software."],
     ["Does it work with TurboTax?", "Yes, via CSV export. QuickBooks .QBO export isn't available yet."],
+    ["Is this AI?", "No — TaxScout uses a rule-based system, not machine learning. Every transaction is matched against IRS categories with a plain-language reason shown, so you can see exactly why something was flagged instead of trusting a black box you can't inspect."],
     ["What if the categorization gets it wrong?", "Click any transaction to see the reasoning behind its category, then mark it deductible or personal yourself. Nothing gets filed without your review."],
     ["How is this different from QuickBooks?", "We're built specifically for solo freelancers — no double-entry bookkeeping, no chart of accounts. Just deductions, fast."],
     ["Is there a contract?", "No. Monthly is month-to-month, annual is one year. Both can be cancelled anytime."],
   ];
+  const faqJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: faqs.map(([q, a]) => ({
+      "@type": "Question",
+      name: q,
+      acceptedAnswer: { "@type": "Answer", text: a },
+    })),
+  };
   return (
     <section id="faq" className="mx-auto max-w-3xl px-6 py-24">
-      <SectionHeader eyebrow="FAQ" title="Questions, answered." />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }} />
+      <SectionHeader title="Questions, answered." />
       <Accordion type="single" collapsible className="mt-10">
         {faqs.map(([q, a]) => (
           <AccordionItem key={q} value={q}>
@@ -441,6 +411,7 @@ function Footer() {
             <span className="text-sm text-muted-foreground">© 2026</span>
           </div>
           <nav className="flex flex-wrap gap-6 text-sm text-muted-foreground">
+            <Link to="/about" className="hover:text-foreground">About</Link>
             <Link to="/privacy" className="hover:text-foreground">Privacy</Link>
             <Link to="/terms" className="hover:text-foreground">Terms</Link>
             <a href="mailto:hello@taxscout.dev" className="hover:text-foreground">Contact</a>
@@ -454,11 +425,10 @@ function Footer() {
   );
 }
 
-function SectionHeader({ eyebrow, title, align = "center" }: { eyebrow: string; title: string; align?: "center" | "left" }) {
+function SectionHeader({ title, align = "center" }: { title: string; align?: "center" | "left" }) {
   return (
     <div className={align === "center" ? "mx-auto max-w-2xl text-center" : "max-w-xl"}>
-      <div className="text-sm font-semibold uppercase tracking-wider text-primary">{eyebrow}</div>
-      <h2 className="mt-2 text-3xl font-bold tracking-tight md:text-4xl">{title}</h2>
+      <h2 className="text-3xl font-bold tracking-tight md:text-4xl">{title}</h2>
     </div>
   );
 }

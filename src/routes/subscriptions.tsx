@@ -6,7 +6,15 @@ import { Switch } from "@/components/ui/switch";
 import { Repeat, AlertCircle } from "lucide-react";
 import { useTransactions, detectSubscriptions, type Subscription } from "@/lib/data";
 
-export const Route = createFileRoute("/subscriptions")({ component: Subs });
+export const Route = createFileRoute("/subscriptions")({
+  head: () => ({
+    meta: [
+      { title: "Subscriptions — TaxScout" },
+      { name: "robots", content: "noindex, nofollow" },
+    ],
+  }),
+  component: Subs,
+});
 
 function Subs() {
   const { transactions } = useTransactions();

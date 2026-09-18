@@ -7,10 +7,19 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Calendar, AlertCircle, PiggyBank } from "lucide-react";
-import { useTransactions, computeKPI, useProfile } from "@/lib/data";
+import { useTransactions, computeKPI, useProfile, computeEntitlements } from "@/lib/data";
 import { STATE_TAX_RATES, STATE_CODES } from "@/lib/stateTax";
+import { UpsellCard } from "@/components/taxscout/UpsellCard";
 
-export const Route = createFileRoute("/quarterly")({ component: Quarterly });
+export const Route = createFileRoute("/quarterly")({
+  head: () => ({
+    meta: [
+      { title: "Quarterly Taxes — TaxScout" },
+      { name: "robots", content: "noindex, nofollow" },
+    ],
+  }),
+  component: Quarterly,
+});
 
 function quarterDueDates(year: number) {
   return [
@@ -24,6 +33,7 @@ function quarterDueDates(year: number) {
 function Quarterly() {
   const { transactions, loading } = useTransactions();
   const { profile, loading: profileLoading } = useProfile();
+  const entitlements = computeEntitlements(profile);
   const kpi = computeKPI(transactions);
   const [income, setIncome] = useState(0);
   const [incomeSeeded, setIncomeSeeded] = useState(false);
@@ -67,6 +77,17 @@ function Quarterly() {
     const isNext = !past && arr.slice(0, i).every((prev) => prev.due < now);
     return { ...q, past, next: isNext };
   });
+
+  if (!profileLoading && !entitlements.canUseQuarterly) {
+    return (
+      <AppShell title="Quarterly Taxes">
+        <UpsellCard
+          feature="The quarterly tax estimator"
+          description="Upgrade to get quarterly self-employment tax estimates based on your actual deductions."
+        />
+      </AppShell>
+    );
+  }
 
   return (
     <AppShell title="Quarterly Taxes">

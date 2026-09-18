@@ -11,9 +11,11 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as TransactionsRouteImport } from './routes/transactions'
 import { Route as TermsRouteImport } from './routes/terms'
+import { Route as TaxscoutVsKeeperTaxRouteImport } from './routes/taxscout-vs-keeper-tax'
 import { Route as SubscriptionsRouteImport } from './routes/subscriptions'
 import { Route as SignupRouteImport } from './routes/signup'
 import { Route as SettingsRouteImport } from './routes/settings'
+import { Route as QuarterlyTaxCalculatorRouteImport } from './routes/quarterly-tax-calculator'
 import { Route as QuarterlyRouteImport } from './routes/quarterly'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as OnboardingRouteImport } from './routes/onboarding'
@@ -22,6 +24,7 @@ import { Route as ExportRouteImport } from './routes/export'
 import { Route as DemoRouteImport } from './routes/demo'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as CategoriesRouteImport } from './routes/categories'
+import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ApiStripeWebhookRouteImport } from './routes/api/stripe-webhook'
 import { Route as ApiDeleteAccountRouteImport } from './routes/api/delete-account'
@@ -41,6 +44,11 @@ const TermsRoute = TermsRouteImport.update({
   path: '/terms',
   getParentRoute: () => rootRouteImport,
 } as any)
+const TaxscoutVsKeeperTaxRoute = TaxscoutVsKeeperTaxRouteImport.update({
+  id: '/taxscout-vs-keeper-tax',
+  path: '/taxscout-vs-keeper-tax',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SubscriptionsRoute = SubscriptionsRouteImport.update({
   id: '/subscriptions',
   path: '/subscriptions',
@@ -54,6 +62,11 @@ const SignupRoute = SignupRouteImport.update({
 const SettingsRoute = SettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const QuarterlyTaxCalculatorRoute = QuarterlyTaxCalculatorRouteImport.update({
+  id: '/quarterly-tax-calculator',
+  path: '/quarterly-tax-calculator',
   getParentRoute: () => rootRouteImport,
 } as any)
 const QuarterlyRoute = QuarterlyRouteImport.update({
@@ -94,6 +107,11 @@ const DashboardRoute = DashboardRouteImport.update({
 const CategoriesRoute = CategoriesRouteImport.update({
   id: '/categories',
   path: '/categories',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AboutRoute = AboutRouteImport.update({
+  id: '/about',
+  path: '/about',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -139,6 +157,7 @@ const ApiPlaidCreateLinkTokenRoute = ApiPlaidCreateLinkTokenRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/about': typeof AboutRoute
   '/categories': typeof CategoriesRoute
   '/dashboard': typeof DashboardRoute
   '/demo': typeof DemoRoute
@@ -147,9 +166,11 @@ export interface FileRoutesByFullPath {
   '/onboarding': typeof OnboardingRoute
   '/privacy': typeof PrivacyRoute
   '/quarterly': typeof QuarterlyRoute
+  '/quarterly-tax-calculator': typeof QuarterlyTaxCalculatorRoute
   '/settings': typeof SettingsRoute
   '/signup': typeof SignupRoute
   '/subscriptions': typeof SubscriptionsRoute
+  '/taxscout-vs-keeper-tax': typeof TaxscoutVsKeeperTaxRoute
   '/terms': typeof TermsRoute
   '/transactions': typeof TransactionsRoute
   '/api/delete-account': typeof ApiDeleteAccountRoute
@@ -162,6 +183,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/about': typeof AboutRoute
   '/categories': typeof CategoriesRoute
   '/dashboard': typeof DashboardRoute
   '/demo': typeof DemoRoute
@@ -170,9 +192,11 @@ export interface FileRoutesByTo {
   '/onboarding': typeof OnboardingRoute
   '/privacy': typeof PrivacyRoute
   '/quarterly': typeof QuarterlyRoute
+  '/quarterly-tax-calculator': typeof QuarterlyTaxCalculatorRoute
   '/settings': typeof SettingsRoute
   '/signup': typeof SignupRoute
   '/subscriptions': typeof SubscriptionsRoute
+  '/taxscout-vs-keeper-tax': typeof TaxscoutVsKeeperTaxRoute
   '/terms': typeof TermsRoute
   '/transactions': typeof TransactionsRoute
   '/api/delete-account': typeof ApiDeleteAccountRoute
@@ -186,6 +210,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/about': typeof AboutRoute
   '/categories': typeof CategoriesRoute
   '/dashboard': typeof DashboardRoute
   '/demo': typeof DemoRoute
@@ -194,9 +219,11 @@ export interface FileRoutesById {
   '/onboarding': typeof OnboardingRoute
   '/privacy': typeof PrivacyRoute
   '/quarterly': typeof QuarterlyRoute
+  '/quarterly-tax-calculator': typeof QuarterlyTaxCalculatorRoute
   '/settings': typeof SettingsRoute
   '/signup': typeof SignupRoute
   '/subscriptions': typeof SubscriptionsRoute
+  '/taxscout-vs-keeper-tax': typeof TaxscoutVsKeeperTaxRoute
   '/terms': typeof TermsRoute
   '/transactions': typeof TransactionsRoute
   '/api/delete-account': typeof ApiDeleteAccountRoute
@@ -211,6 +238,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/about'
     | '/categories'
     | '/dashboard'
     | '/demo'
@@ -219,9 +247,11 @@ export interface FileRouteTypes {
     | '/onboarding'
     | '/privacy'
     | '/quarterly'
+    | '/quarterly-tax-calculator'
     | '/settings'
     | '/signup'
     | '/subscriptions'
+    | '/taxscout-vs-keeper-tax'
     | '/terms'
     | '/transactions'
     | '/api/delete-account'
@@ -234,6 +264,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/about'
     | '/categories'
     | '/dashboard'
     | '/demo'
@@ -242,9 +273,11 @@ export interface FileRouteTypes {
     | '/onboarding'
     | '/privacy'
     | '/quarterly'
+    | '/quarterly-tax-calculator'
     | '/settings'
     | '/signup'
     | '/subscriptions'
+    | '/taxscout-vs-keeper-tax'
     | '/terms'
     | '/transactions'
     | '/api/delete-account'
@@ -257,6 +290,7 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/about'
     | '/categories'
     | '/dashboard'
     | '/demo'
@@ -265,9 +299,11 @@ export interface FileRouteTypes {
     | '/onboarding'
     | '/privacy'
     | '/quarterly'
+    | '/quarterly-tax-calculator'
     | '/settings'
     | '/signup'
     | '/subscriptions'
+    | '/taxscout-vs-keeper-tax'
     | '/terms'
     | '/transactions'
     | '/api/delete-account'
@@ -281,6 +317,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AboutRoute: typeof AboutRoute
   CategoriesRoute: typeof CategoriesRoute
   DashboardRoute: typeof DashboardRoute
   DemoRoute: typeof DemoRoute
@@ -289,9 +326,11 @@ export interface RootRouteChildren {
   OnboardingRoute: typeof OnboardingRoute
   PrivacyRoute: typeof PrivacyRoute
   QuarterlyRoute: typeof QuarterlyRoute
+  QuarterlyTaxCalculatorRoute: typeof QuarterlyTaxCalculatorRoute
   SettingsRoute: typeof SettingsRoute
   SignupRoute: typeof SignupRoute
   SubscriptionsRoute: typeof SubscriptionsRoute
+  TaxscoutVsKeeperTaxRoute: typeof TaxscoutVsKeeperTaxRoute
   TermsRoute: typeof TermsRoute
   TransactionsRoute: typeof TransactionsRoute
   ApiDeleteAccountRoute: typeof ApiDeleteAccountRoute
@@ -319,6 +358,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TermsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/taxscout-vs-keeper-tax': {
+      id: '/taxscout-vs-keeper-tax'
+      path: '/taxscout-vs-keeper-tax'
+      fullPath: '/taxscout-vs-keeper-tax'
+      preLoaderRoute: typeof TaxscoutVsKeeperTaxRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/subscriptions': {
       id: '/subscriptions'
       path: '/subscriptions'
@@ -338,6 +384,13 @@ declare module '@tanstack/react-router' {
       path: '/settings'
       fullPath: '/settings'
       preLoaderRoute: typeof SettingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/quarterly-tax-calculator': {
+      id: '/quarterly-tax-calculator'
+      path: '/quarterly-tax-calculator'
+      fullPath: '/quarterly-tax-calculator'
+      preLoaderRoute: typeof QuarterlyTaxCalculatorRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/quarterly': {
@@ -394,6 +447,13 @@ declare module '@tanstack/react-router' {
       path: '/categories'
       fullPath: '/categories'
       preLoaderRoute: typeof CategoriesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/about': {
+      id: '/about'
+      path: '/about'
+      fullPath: '/about'
+      preLoaderRoute: typeof AboutRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -457,6 +517,7 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AboutRoute: AboutRoute,
   CategoriesRoute: CategoriesRoute,
   DashboardRoute: DashboardRoute,
   DemoRoute: DemoRoute,
@@ -465,9 +526,11 @@ const rootRouteChildren: RootRouteChildren = {
   OnboardingRoute: OnboardingRoute,
   PrivacyRoute: PrivacyRoute,
   QuarterlyRoute: QuarterlyRoute,
+  QuarterlyTaxCalculatorRoute: QuarterlyTaxCalculatorRoute,
   SettingsRoute: SettingsRoute,
   SignupRoute: SignupRoute,
   SubscriptionsRoute: SubscriptionsRoute,
+  TaxscoutVsKeeperTaxRoute: TaxscoutVsKeeperTaxRoute,
   TermsRoute: TermsRoute,
   TransactionsRoute: TransactionsRoute,
   ApiDeleteAccountRoute: ApiDeleteAccountRoute,
